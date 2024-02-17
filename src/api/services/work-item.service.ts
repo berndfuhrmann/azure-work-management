@@ -26,8 +26,7 @@ export class WorkItemService extends ApiBase {
 			query: `SELECT [System.State], [System.Title] FROM WorkItems WHERE [System.IterationPath] = '${iterationPath}' AND (${systemAreaPath}) AND (${workItemType}) AND [System.BoardColumn] = '${boardColumn}' ORDER BY [State] Asc`,
 		};
 
-		const workItemTrackingApi = await this.webApi.getWorkItemTrackingApi();
-		const workItems = await workItemTrackingApi.queryByWiql(
+		const workItems = await this._apiProvider.workItemTrackingApi.queryByWiql(
 			{
 				query: data.query,
 			},
@@ -46,13 +45,12 @@ export class WorkItemService extends ApiBase {
 			return [];
 		}
 
-		const workItemTrackingApi = await this.webApi.getWorkItemTrackingApi();
 		const chunks = chunk(ids, 200);
 
 		const result: WorkItem[] = [];
 
 		const workItemsPromises = chunks.map((idChunk) =>
-			workItemTrackingApi.getWorkItems(idChunk),
+			this._apiProvider.workItemTrackingApi.getWorkItems(idChunk),
 		);
 
 		for (const workItemPromise of workItemsPromises) {
@@ -62,11 +60,11 @@ export class WorkItemService extends ApiBase {
 		return result;
 	}
 
-	async updateWorkItem(
-		id: number,
-		changes: JsonPatchDocument,
-	): Promise<WorkItem> {
-		const workItemTrackingApi = await this.webApi.getWorkItemTrackingApi();
-		return await workItemTrackingApi.updateWorkItem({}, changes, id);
+	async updateWorkItem(id: number, changes: JsonPatchDocument) {
+		return await this._apiProvider.workItemTrackingApi.updateWorkItem(
+			{},
+			changes,
+			id,
+		);
 	}
 }

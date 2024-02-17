@@ -1,27 +1,22 @@
 import { WorkItemService } from '.';
-import { getAppSettings, getTeamContext } from '../../services';
+import { getTeamContext } from '../../services';
 import { ApiBase } from '../api-base.class';
+import { ApiProvider } from '../api-provider.class';
 
 export class BacklogService extends ApiBase {
-	private _workItemService: WorkItemService = new WorkItemService();
-
-	protected get projectName(): string {
-		return encodeURI(getAppSettings().get('project') as string);
+	constructor(
+		apiProvider: ApiProvider,
+		private _workItemService: WorkItemService,
+	) {
+		super(apiProvider);
 	}
-	protected get teamName(): string {
-		return encodeURI(getAppSettings().get('team') as string);
-	}
-
-	protected apiVersion: string = 'api-version=6.1-preview.1';
 
 	async getBacklogs() {
-		const workApi = await this.webApi.getWorkApi();
-		return workApi.getBacklogs(getTeamContext());
+		return this._apiProvider.workApi.getBacklogs(getTeamContext());
 	}
 
 	async getBacklogWorkItems(backlogID: string) {
-		const workApi = await this.webApi.getWorkApi();
-		const workItems = await workApi.getBacklogLevelWorkItems(
+		const workItems = await this._apiProvider.workApi.getBacklogLevelWorkItems(
 			getTeamContext(),
 			backlogID,
 		);

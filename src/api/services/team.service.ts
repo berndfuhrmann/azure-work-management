@@ -3,13 +3,11 @@ import { ApiBase } from '../api-base.class';
 
 export class TeamService extends ApiBase {
 	async getTeams() {
-		const coreApi = await this.webApi.getCoreApi();
-		return await coreApi.getTeams(getProject());
+		return await this._apiProvider.coreApi.getTeams(getProject());
 	}
 
 	async getTeamMembers(projectName: string, teamName: string) {
-		const coreApi = await this.webApi.getCoreApi();
-		return await coreApi.getTeamMembersWithExtendedProperties(
+		return await this._apiProvider.coreApi.getTeamMembersWithExtendedProperties(
 			projectName,
 			teamName,
 		);

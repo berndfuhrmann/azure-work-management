@@ -1,16 +1,83 @@
 import * as vscode from 'vscode';
-import { chooseAction } from './actions/work-item-edit.actions';
-import { IterationService, TeamFieldValuesService } from './api/services';
+import { WorkItemEditActions } from './actions/work-item-edit.actions';
+import {
+	BacklogService,
+	BoardService,
+	IterationService,
+	ProjectService,
+	TeamFieldValuesService,
+	TeamService,
+	WorkItemService,
+} from './api/services';
 import { getAppSettings } from './services';
 import { WorkItemItem } from './tree-items';
 import { BacklogTreeProvider } from './tree-providers/backlog-tree.provider';
 import { BoardsTreeProvider } from './tree-providers/board-tree.provider';
+import { ApiProvider } from './api/api-provider.class';
+import { ApiError } from './api/api-error.class';
 
-export function activate(context: vscode.ExtensionContext) {
-	const boardTreeProvider: BoardsTreeProvider = new BoardsTreeProvider(context);
+export async function activate(context: vscode.ExtensionContext) {
+	const apiProvider = new ApiProvider();
+	try {
+		await apiProvider.initialize();
+	} catch (e) {
+		if (e instanceof ApiError) {
+			vscode.window.showErrorMessage(e.message);
+			return;
+		}
+		throw e;
+	}
+
+	const boardService = new BoardService(apiProvider);
+	const iterationService = new IterationService(apiProvider);
+	const teamService = new TeamService(apiProvider);
+	const teamFieldValuesService = new TeamFieldValuesService(apiProvider);
+	const workItemService = new WorkItemService(apiProvider);
+	const backlogService = new BacklogService(apiProvider, workItemService);
+
+	const boardTreeProvider: BoardsTreeProvider = new BoardsTreeProvider(
+		context,
+		boardService,
+		workItemService,
+	);
 	const backlogTreeProvider: BacklogTreeProvider = new BacklogTreeProvider(
 		context,
+		backlogService,
 	);
+
+	const workItemEditActions = new WorkItemEditActions(
+		teamService,
+		workItemService,
+	);
+
+	const setCurrentIteration = async () => {
+		const iterationsRaw = await iterationService.getIterations();
+		const iterations = iterationsRaw.map((iteration) => ({
+			label: `${iteration.name}:${iteration.attributes!.timeFrame}`,
+			data: iteration,
+		}));
+
+		const result = await vscode.window.showQuickPick(iterations, {
+			placeHolder: 'Choose An Iteration',
+		});
+
+		if (result) {
+			getAppSettings().update('iteration', result.data.path, true);
+		}
+
+		setTimeout(() => {
+			vscode.commands.executeCommand('azure-work-management.refresh-boards');
+		}, 1000);
+	};
+
+	const setSystemAreaPaths = async (globalState: vscode.Memento) => {
+		globalState.update('system-area-path', null);
+		const teamFields = await teamFieldValuesService.getTeamFieldValues();
+		globalState.update(
+			'system-area-path',
+			JSON.stringify([...(teamFields.values ?? [])]),
+		);
+	};
 
 	vscode.window.registerTreeDataProvider(
 		'azure-work-management.open-boards',
@@ -67,39 +134,7 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand(
 		'azure-work-management.edit-work-item',
 		(workItem: WorkItemItem) => {
-			chooseAction(workItem);
+			workItemEditActions.chooseAction(workItem);
 		},
 	);
 }
-
-const setCurrentIteration = async () => {
-	const iterationService: IterationService = new IterationService();
-	const iterationsRaw = await iterationService.getIterations();
-	const iterations = iterationsRaw.map((iteration) => ({
-		label: `${iteration.name}:${iteration.attributes!.timeFrame}`,
-		data: iteration,
-	}));
-
-	const result = await vscode.window.showQuickPick(iterations, {
-		placeHolder: 'Choose An Iteration',
-	});
-
-	if (result) {
-		getAppSettings().update('iteration', result.data.path, true);
-	}
-
-	setTimeout(() => {
-		vscode.commands.executeCommand('azure-work-management.refresh-boards');
-	}, 1000);
-};
-
-const setSystemAreaPaths = async (globalState: vscode.Memento) => {
-	globalState.update('system-area-path', null);
-	const teamFieldValuesService: TeamFieldValuesService =
-		new TeamFieldValuesService();
-	const teamFields = await teamFieldValuesService.getTeamFieldValues();
-	globalState.update(
-		'system-area-path',
-		JSON.stringify([...(teamFields.values ?? [])]),
-	);
-};

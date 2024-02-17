@@ -3,12 +3,13 @@ import { ApiBase } from '../api-base.class';
 
 export class IterationService extends ApiBase {
 	async getIterations() {
-		const workApi = await this.webApi.getWorkApi();
-		return workApi.getTeamIterations(getTeamContext());
+		return this._apiProvider.workApi.getTeamIterations(getTeamContext());
 	}
 
 	async getCurrentIteration() {
-		const workApi = await this.webApi.getWorkApi();
-		return workApi.getTeamIterations(getTeamContext(), 'current');
+		return this._apiProvider.workApi.getTeamIterations(
+			getTeamContext(),
+			'current',
+		);
 	}
 }
