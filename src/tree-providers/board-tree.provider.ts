@@ -2,74 +2,51 @@ import { BoardColumn } from 'azure-devops-node-api/interfaces/WorkInterfaces';
 import * as vscode from 'vscode';
 import { TeamFieldValue } from '../api';
 import { BoardService, WorkItemService } from '../api/services';
-import { getAppSettings, isValidAppSettings } from '../services';
+import { getAppSettings } from '../services';
 import { BoardItem } from '../tree-items/board-item.class';
 import { ColumnItem } from '../tree-items/column-item.class';
 import { WorkItemItem } from '../tree-items/work-item-item.class';
+import { AbstractTreeProvider } from './abstract-tree-provider';
 
-export class BoardsTreeProvider
-	implements vscode.TreeDataProvider<vscode.TreeItem>
-{
-	private _onDidChangeTreeData: vscode.EventEmitter<
-		BoardItem | undefined | void
-	> = new vscode.EventEmitter<BoardItem | undefined | void>();
-	readonly onDidChangeTreeData: vscode.Event<BoardItem | undefined | void> =
-		this._onDidChangeTreeData.event;
-
+export class BoardsTreeProvider extends AbstractTreeProvider {
 	constructor(
-		private _context: vscode.ExtensionContext,
+		context: vscode.ExtensionContext,
 		private _boardService: BoardService,
 		private _workItemService: WorkItemService,
-	) {}
-
-	refresh(): void {
-		this._onDidChangeTreeData.fire();
-	}
-
-	getTreeItem(
-		element: vscode.TreeItem,
-	): vscode.TreeItem | Thenable<vscode.TreeItem> {
-		return element;
-	}
-
-	getChildren(
-		element?: vscode.TreeItem,
-	): vscode.ProviderResult<vscode.TreeItem[]> {
-		if (isValidAppSettings()) {
-			const contextValueGetters: {
-				[key: string]: () => Promise<vscode.TreeItem[]>;
-			} = {
-				default: this.getBoards.bind(this),
-				board: this.getColumns.bind(this, element as BoardItem),
-				column: this.getWorkItems.bind(this, element as ColumnItem),
-				workItem: () => Promise.resolve([]),
-			};
-
-			const key: string = element?.contextValue || 'default';
-			return contextValueGetters[key]();
-		}
-
-		return [];
+	) {
+		super(context);
+		this.getChildrenForContext.set(AbstractTreeProvider.defaultKey, () =>
+			this.getBoards(),
+		);
+		this.getChildrenForContext.set('board', (element) =>
+			this.getColumns(element as BoardItem),
+		);
+		this.getChildrenForContext.set('column', (element) =>
+			this.getWorkItems(element as ColumnItem),
+		);
+		this.getChildrenForContext.set('workItem', () => []);
 	}
 
 	private async getBoards(): Promise<BoardItem[]> {
 		const boards = await this._boardService.getAll();
-		return boards.map((board) => {
-			return new BoardItem(board, vscode.TreeItemCollapsibleState.Collapsed);
-		});
+		return boards.map(
+			(board) =>
+				new BoardItem(board, vscode.TreeItemCollapsibleState.Collapsed),
+		);
 	}
 
 	private async getColumns(element: BoardItem) {
 		const columns = await this._boardService.getColumns(element.getBoardID());
 		element.setColumns(columns);
 
-		return columns.map((column) => {
-			return new ColumnItem(
-				element,
-				column,
-				vscode.TreeItemCollapsibleState.Collapsed,
-			);
-		});
+		return columns.map(
+			(column) =>
+				new ColumnItem(
+					element,
+					column,
+					vscode.TreeItemCollapsibleState.Collapsed,
+				),
+		);
 	}
 
 	private async getWorkItems(element: ColumnItem) {
@@ -87,12 +64,13 @@ export class BoardsTreeProvider
 			workItemTypes,
 		);
 
-		return workItems.map((workItem) => {
-			return new WorkItemItem(
-				workItem,
-				columns,
-				vscode.TreeItemCollapsibleState.None,
-			);
-		});
+		return workItems.map(
+			(workItem) =>
+				new WorkItemItem(
+					workItem,
+					columns,
+					vscode.TreeItemCollapsibleState.None,
+				),
+		);
 	}
 }
