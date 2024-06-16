@@ -15,7 +15,7 @@
 	"icon": "resources/azure-devops-128.png",
 	"version": "1.0.11",
 	"engines": {
-		"vscode": "^1.85.0"
+		"vscode": "^1.90.0"
 	},
 	"categories": [
 		"Other",
@@ -192,25 +192,25 @@
 	},
 	"devDependencies": {
 		"@types/glob": "^8.1.0",
-		"@types/lodash": "^4.14.202",
+		"@types/lodash": "^4.17.5",
 		"@types/mocha": "^10.0.6",
 		"@types/node": "^20.11.5",
 		"@types/vscode": "^1.85.0",
-		"@typescript-eslint/eslint-plugin": "^6.19.0",
-		"@typescript-eslint/parser": "^6.19.0",
+		"@typescript-eslint/eslint-plugin": "^7.13.0",
+		"@typescript-eslint/parser": "^7.13.0",
 		"@vscode/test-cli": "^0.0.9",
 		"@vscode/test-electron": "^2.4.0",
 		"eslint": "^8.56.0",
-		"glob": "^7.1.7",
-		"mocha": "^10.2.0",
-		"prettier": "3.2.5",
+		"glob": "^10.4.1",
+		"mocha": "^10.4.0",
+		"prettier": "3.3.2",
 		"ts-loader": "^9.5.1",
-		"typescript": "^5.3.3",
-		"webpack": "^5.89.0",
+		"typescript": "^5.4.5",
+		"webpack": "^5.92.0",
 		"webpack-cli": "^5.1.4"
 	},
 	"dependencies": {
-		"azure-devops-node-api": "^12.4.0",
+		"azure-devops-node-api": "^13.0.0",
 		"lodash": "^4.17.21"
 	}
 }

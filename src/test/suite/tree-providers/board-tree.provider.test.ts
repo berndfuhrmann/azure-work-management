@@ -30,12 +30,14 @@ suite('BoardTreeProvider', () => {
 		const appSettingsService = mockAppSettingService;
 		const boardService = {
 			getAll: async () => {
-				return [{
-					name: 'test-board1',
-					id: 'test-id1',
-					url: 'test-board-url1'
-				}];
-			} 
+				return [
+					{
+						name: 'test-board1',
+						id: 'test-id1',
+						url: 'test-board-url1',
+					},
+				];
+			},
 		} as BoardService;
 		const workItemService = {} as WorkItemService;
 		const subject = new BoardsTreeProvider(

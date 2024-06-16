@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { chooseAction } from './actions/work-item-edit.actions';
+import { setIteration } from './actions/set-current-iteration.action';
+import { chooseAction } from './actions/work-item-edit.action';
 import { BacklogService } from './api/services/backlog.service';
 import { BoardService } from './api/services/board.service';
 import { IterationService } from './api/services/iteration.service';
@@ -63,10 +64,12 @@ export function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand(
 		'azure-work-management.set-iteration',
-		async () => {
-			await setSystemAreaPaths(context.globalState, teamFieldValuesService);
-			setCurrentIteration(appSettingsService, iterationService);
-		},
+		async () =>
+			await setIteration(context, {
+				appSettingsService,
+				iterationService,
+				teamFieldValuesService,
+			}),
 	);
 
 	vscode.commands.registerCommand(
@@ -95,48 +98,3 @@ export function activate(context: vscode.ExtensionContext) {
 		},
 	);
 }
-
-const setCurrentIteration = async (
-	appSettingsService: AppSettingsService,
-	iterationService: IterationService,
-) => {
-	const iterationsRaw = await iterationService.getIterations();
-
-	const iterationTimeframes = {
-		0: 'Past',
-		1: 'Current',
-		2: 'Future',
-		3: 'Unknown',
-	};
-
-	const iterations = iterationsRaw.map((iteration) => ({
-		label: `${iteration.name}:${iterationTimeframes[iteration.attributes!.timeFrame ?? 3]}`,
-		data: iteration,
-	}));
-
-	const result = await vscode.window.showQuickPick(iterations, {
-		placeHolder: 'Choose An Iteration',
-	});
-
-	if (result) {
-		appSettingsService
-			.getAppSettings()
-			.update('iteration', result.data.path, true);
-	}
-
-	setTimeout(() => {
-		vscode.commands.executeCommand('azure-work-management.refresh-boards');
-	}, 1000);
-};
-
-const setSystemAreaPaths = async (
-	globalState: vscode.Memento,
-	teamFieldValuesService: TeamFieldValuesService,
-) => {
-	globalState.update('system-area-path', null);
-	const teamFields = await teamFieldValuesService.getTeamFieldValues();
-	globalState.update(
-		'system-area-path',
-		JSON.stringify([...(teamFields.values ?? [])]),
-	);
-};

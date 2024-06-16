@@ -3,66 +3,38 @@ import { BacklogService } from '../api/services/backlog.service';
 import { AppSettingsService } from '../services/app-settings.service';
 import { BacklogItem } from '../tree-items/backlog-item.class';
 import { WorkItemItem } from '../tree-items/work-item-item.class';
+import { AbstractTreeProvider } from './abstract-tree-provider';
 
 export class BacklogTreeProvider
+	extends AbstractTreeProvider
 	implements vscode.TreeDataProvider<vscode.TreeItem>
 {
-	private _onDidChangeTreeData: vscode.EventEmitter<
-		BacklogItem | undefined | void
-	> = new vscode.EventEmitter<BacklogItem | undefined | void>();
-	readonly onDidChangeTreeData: vscode.Event<BacklogItem | undefined | void> =
-		this._onDidChangeTreeData.event;
-
 	constructor(
-		private _context: vscode.ExtensionContext,
-		private _appSettingsService: AppSettingsService,
+		_context: vscode.ExtensionContext,
+		_appSettingsService: AppSettingsService,
 		private _backlogService: BacklogService,
-	) {}
-
-	refresh(): void {
-		this._onDidChangeTreeData.fire();
-	}
-
-	getTreeItem(
-		element: vscode.TreeItem,
-	): vscode.TreeItem | Thenable<vscode.TreeItem> {
-		return element;
-	}
-
-	getChildren(
-		element?: vscode.TreeItem,
-	): vscode.ProviderResult<vscode.TreeItem[]> {
-		if (this._appSettingsService.isValidAppSettings()) {
-			const contextValueGetters: {
-				[key: string]: () => Promise<vscode.TreeItem[]>;
-			} = {
-				default: this.getBacklogs.bind(this),
-				backlog: this.getWorkItems.bind(this, element as BacklogItem),
-				workItem: () => Promise.resolve([]),
-			};
-
-			const key: string = element?.contextValue || 'default';
-			return contextValueGetters[key]();
-		}
-
-		return [];
+	) {
+		super(_appSettingsService);
+		this.getChildrenForContext.set('default', this.getBacklogs.bind(this));
+		this.getChildrenForContext.set(
+			'backlog',
+			(element: vscode.TreeItem | undefined) =>
+				this.getWorkItems(element as BacklogItem),
+		);
+		this.getChildrenForContext.set('workItem', () => Promise.resolve([]));
 	}
 
 	private async getBacklogs() {
 		const backlogs = await this._backlogService.getBacklogs();
-		return backlogs.map((backlog) => {
-			return new BacklogItem(
-				backlog,
-				vscode.TreeItemCollapsibleState.Collapsed,
-			);
-		});
+		return backlogs.map(
+			(backlog) =>
+				new BacklogItem(backlog, vscode.TreeItemCollapsibleState.Collapsed),
+		);
 	}
 
 	private async getWorkItems(element: BacklogItem) {
 		const backlogID: string = element.getBacklogID();
 		const workItems = await this._backlogService.getBacklogWorkItems(backlogID);
-		// const types: string[] = workItems.map((wi) => wi.fields['System.WorkItemType']);
-		// console.log(types.filter((t, i, a) => a.indexOf(t) === i));
 
 		return workItems.map((workItem) => {
 			return new WorkItemItem(

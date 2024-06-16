@@ -8,49 +8,27 @@ import { AppSettingsService } from '../services/app-settings.service';
 import { BoardItem } from '../tree-items/board-item.class';
 import { ColumnItem } from '../tree-items/column-item.class';
 import { WorkItemItem } from '../tree-items/work-item-item.class';
+import { AbstractTreeProvider } from './abstract-tree-provider';
 
 export class BoardsTreeProvider
+	extends AbstractTreeProvider
 	implements vscode.TreeDataProvider<vscode.TreeItem>
 {
-	private _onDidChangeTreeData: vscode.EventEmitter<
-		BoardItem | undefined | void
-	> = new vscode.EventEmitter<BoardItem | undefined | void>();
-	readonly onDidChangeTreeData: vscode.Event<BoardItem | undefined | void> =
-		this._onDidChangeTreeData.event;
-
 	constructor(
 		private _context: vscode.ExtensionContext,
-		private _appSettingsService: AppSettingsService,
+		_appSettingsService: AppSettingsService,
 		private _boardService: BoardService,
 		private _workItemService: WorkItemService,
-	) {}
-
-	refresh(): void {
-		this._onDidChangeTreeData.fire();
-	}
-
-	getTreeItem(element: vscode.TreeItem) {
-		return element;
-	}
-
-	getChildren(
-		element?: vscode.TreeItem,
-	): vscode.ProviderResult<vscode.TreeItem[]> {
-		if (this._appSettingsService.isValidAppSettings()) {
-			const contextValueGetters: {
-				[key: string]: () => Promise<vscode.TreeItem[]>;
-			} = {
-				default: this.getBoards.bind(this),
-				board: this.getColumns.bind(this, element as BoardItem),
-				column: this.getWorkItems.bind(this, element as ColumnItem),
-				workItem: () => Promise.resolve([]),
-			};
-
-			const key: string = element?.contextValue || 'default';
-			return contextValueGetters[key]();
-		}
-
-		return [];
+	) {
+		super(_appSettingsService);
+		this.getChildrenForContext.set('default', (_element) => this.getBoards());
+		this.getChildrenForContext.set('board', (element) =>
+			this.getColumns(element as BoardItem),
+		);
+		this.getChildrenForContext.set('column', (element) =>
+			this.getWorkItems(element as ColumnItem),
+		);
+		this.getChildrenForContext.set('workItem', () => Promise.resolve([]));
 	}
 
 	private async getBoards(): Promise<BoardItem[]> {
@@ -88,12 +66,13 @@ export class BoardsTreeProvider
 			workItemTypes,
 		);
 
-		return workItems.map((workItem) => {
-			return new WorkItemItem(
-				workItem,
-				columns,
-				vscode.TreeItemCollapsibleState.None,
-			);
-		});
+		return workItems.map(
+			(workItem) =>
+				new WorkItemItem(
+					workItem,
+					columns,
+					vscode.TreeItemCollapsibleState.None,
+				),
+		);
 	}
 }
