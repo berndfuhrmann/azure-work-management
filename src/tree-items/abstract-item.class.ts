@@ -7,22 +7,8 @@ export abstract class AbstractItem<
 	ParentItem extends AbstractItem<any, any> | undefined,
 > extends vscode.TreeItem {
 	iconPath = {
-		light: path.join(
-			__filename,
-			'..',
-			'..',
-			'resources',
-			'light',
-			`${this.getIconName()}.svg`,
-		),
-		dark: path.join(
-			__filename,
-			'..',
-			'..',
-			'resources',
-			'dark',
-			`${this.getIconName()}.svg`,
-		),
+		light: '',
+		dark: '',
 	};
 
 	constructor(
@@ -33,6 +19,22 @@ export abstract class AbstractItem<
 		super('');
 		this.label = this.getName();
 		this.collapsibleState = this.getCollapsibleState();
+		this.iconPath.light = path.join(
+			__filename,
+			'..',
+			'..',
+			'resources',
+			'light',
+			`${this.getIconName()}.svg`,
+		);
+		this.iconPath.dark = path.join(
+			__filename,
+			'..',
+			'..',
+			'resources',
+			'dark',
+			`${this.getIconName()}.svg`,
+		);
 	}
 
 	abstract getName(): string;

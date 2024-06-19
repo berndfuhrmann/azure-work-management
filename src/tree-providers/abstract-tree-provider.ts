@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { AppSettingsService } from '../services/app-settings.service';
+import { AbstractItem } from '../tree-items/abstract-item.class';
 
 export abstract class AbstractTreeProvider
 	implements vscode.TreeDataProvider<vscode.TreeItem>
@@ -37,5 +38,11 @@ export abstract class AbstractTreeProvider
 		}
 
 		return [];
+	}
+
+	getParent(element: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem> {
+		if (element instanceof AbstractItem) {
+			return element.parent;
+		}
 	}
 }
