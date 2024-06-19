@@ -1,34 +1,36 @@
 import { BacklogLevelConfiguration } from 'azure-devops-node-api/interfaces/WorkInterfaces';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { AbstractItem } from './abstract-item.class';
 
-export class BacklogItem extends vscode.TreeItem {
-	contextValue = 'backlog';
-
-	iconPath = {
-		light: path.join(
-			__filename,
-			'..',
-			'..',
-			'resources',
-			'light',
-			'backlog.svg',
-		),
-		dark: path.join(__filename, '..', '..', 'resources', 'dark', 'backlog.svg'),
-	};
-
+export class BacklogItem<
+	ParentItem extends AbstractItem<any, any>,
+> extends AbstractItem<BacklogLevelConfiguration, ParentItem | undefined> {
 	constructor(
-		private _backlog: BacklogLevelConfiguration,
-		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+		item: BacklogLevelConfiguration,
+		parent: ParentItem | undefined,
+		public collapsibleState: vscode.TreeItemCollapsibleState,
 	) {
-		super(_backlog.name!, collapsibleState);
+		super(item, parent, 'backlog');
+	}
+
+	getName() {
+		return this.item.name!;
+	}
+
+	getCollapsibleState() {
+		return this.collapsibleState;
+	}
+
+	getIconName(): string {
+		return 'backlog';
 	}
 
 	getBacklogID(): string {
-		return this._backlog.id!;
+		return this.item.id!;
 	}
 
 	getBacklog(): BacklogLevelConfiguration {
-		return this._backlog;
+		return this.item;
 	}
 }

@@ -2,50 +2,38 @@ import { BoardColumn } from 'azure-devops-node-api/interfaces/WorkInterfaces';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { BoardItem } from '../tree-items/board-item.class';
+import { AbstractItem } from './abstract-item.class';
 
-export class ColumnItem extends vscode.TreeItem {
-	contextValue = 'column';
-
-	iconPath = {
-		light: path.join(
-			__filename,
-			'..',
-			'..',
-			'resources',
-			'light',
-			'board-column.svg',
-		),
-		dark: path.join(
-			__filename,
-			'..',
-			'..',
-			'resources',
-			'dark',
-			'board-column.svg',
-		),
-	};
-
+export class ColumnItem extends AbstractItem<BoardColumn, BoardItem<any>> {
 	constructor(
-		private _board: BoardItem,
-		private _column: BoardColumn,
+		item: BoardColumn,
+		parent: BoardItem<any>,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 	) {
-		super(_column.name!, collapsibleState);
+		super(item, parent, 'column');
+	}
+
+	getName() {
+		return this.item.name!;
+	}
+
+	getCollapsibleState() {
+		return this.collapsibleState;
+	}
+
+	getIconName(): string {
+		return 'board-column';
 	}
 
 	getColumnID(): string {
-		return this._column.id!;
+		return this.item.id!;
 	}
 
 	getColumnName(): string {
-		return this._column.name!;
-	}
-
-	getBoardItem(): BoardItem {
-		return this._board;
+		return this.item.name!;
 	}
 
 	getAllowedWorkItemTypes(): string[] {
-		return Object.keys(this._column.stateMappings!);
+		return Object.keys(this.item.stateMappings!);
 	}
 }

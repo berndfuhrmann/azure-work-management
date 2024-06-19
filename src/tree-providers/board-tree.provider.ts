@@ -23,7 +23,7 @@ export class BoardsTreeProvider
 		super(_appSettingsService);
 		this.getChildrenForContext.set('default', (_element) => this.getBoards());
 		this.getChildrenForContext.set('board', (element) =>
-			this.getColumns(element as BoardItem),
+			this.getColumns(element as BoardItem<any>),
 		);
 		this.getChildrenForContext.set('column', (element) =>
 			this.getWorkItems(element as ColumnItem),
@@ -31,21 +31,25 @@ export class BoardsTreeProvider
 		this.getChildrenForContext.set('workItem', () => Promise.resolve([]));
 	}
 
-	private async getBoards(): Promise<BoardItem[]> {
+	private async getBoards(): Promise<BoardItem<any>[]> {
 		const boards = await this._boardService.getAll();
 		return boards.map((board) => {
-			return new BoardItem(board, vscode.TreeItemCollapsibleState.Collapsed);
+			return new BoardItem(
+				board,
+				undefined,
+				vscode.TreeItemCollapsibleState.Collapsed,
+			);
 		});
 	}
 
-	private async getColumns(element: BoardItem) {
+	private async getColumns(element: BoardItem<any>) {
 		const columns = await this._boardService.getColumns(element.getBoardID());
 		element.setColumns(columns);
 
 		return columns.map((column) => {
 			return new ColumnItem(
-				element,
 				column,
+				element,
 				vscode.TreeItemCollapsibleState.Collapsed,
 			);
 		});
@@ -57,7 +61,7 @@ export class BoardsTreeProvider
 			this._context.globalState.get('system-area-path') as string,
 		);
 		const boardColumn: string = element.getColumnName();
-		const columns: BoardColumn[] = element.getBoardItem().getColumns();
+		const columns: BoardColumn[] = element.parent.getColumns();
 		const workItemTypes: string[] = element.getAllowedWorkItemTypes();
 		const workItems = await this._workItemService.queryForWorkItems(
 			iterationPath,
@@ -70,6 +74,7 @@ export class BoardsTreeProvider
 			(workItem) =>
 				new WorkItemItem(
 					workItem,
+					element,
 					columns,
 					vscode.TreeItemCollapsibleState.None,
 				),

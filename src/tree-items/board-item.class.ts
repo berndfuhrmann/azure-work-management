@@ -4,22 +4,31 @@ import {
 	Board,
 	BoardColumn,
 } from 'azure-devops-node-api/interfaces/WorkInterfaces';
+import { AbstractItem } from './abstract-item.class';
 
-export class BoardItem extends vscode.TreeItem {
+export class BoardItem<
+	ParentItem extends AbstractItem<any, any>,
+> extends AbstractItem<Board, ParentItem | undefined> {
 	private _columns: BoardColumn[] = [];
-
-	contextValue = 'board';
-
-	iconPath = {
-		light: path.join(__filename, '..', '..', 'resources', 'light', 'board.svg'),
-		dark: path.join(__filename, '..', '..', 'resources', 'dark', 'board.svg'),
-	};
 
 	constructor(
 		private _board: Board,
+		parent: ParentItem | undefined,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 	) {
-		super(_board.name!, collapsibleState);
+		super(_board, parent, 'board');
+	}
+
+	getName() {
+		return this.item.name!;
+	}
+
+	getCollapsibleState() {
+		return this.collapsibleState;
+	}
+
+	getIconName(): string {
+		return 'board';
 	}
 
 	getBoardID(): string {

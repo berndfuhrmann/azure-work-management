@@ -2,14 +2,12 @@ import { BoardColumn } from 'azure-devops-node-api/interfaces/WorkInterfaces';
 import { WorkItem } from 'azure-devops-node-api/interfaces/WorkItemTrackingInterfaces';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { AbstractItem } from './abstract-item.class';
 
-export class WorkItemItem extends vscode.TreeItem {
+export class WorkItemItem<
+	ParentItem extends AbstractItem<any, any>,
+> extends AbstractItem<WorkItem, ParentItem | undefined> {
 	contextValue = 'workItem';
-
-	iconPath: {
-		light: string;
-		dark: string;
-	};
 
 	command = {
 		title: 'Open Work Item',
@@ -18,46 +16,49 @@ export class WorkItemItem extends vscode.TreeItem {
 	};
 
 	constructor(
-		private _workItem: WorkItem,
+		item: WorkItem,
+		parent: ParentItem | undefined,
 		private _columns: BoardColumn[],
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 	) {
-		super(
-			`${_workItem.id}: ${_workItem.fields!['System.Title']}`,
-			collapsibleState,
-		);
-		this.iconPath = {
-			light: path.join(
-				__filename,
-				'..',
-				'..',
-				'resources',
-				'light',
-				this.getIcon(),
-			),
-			dark: path.join(
-				__filename,
-				'..',
-				'..',
-				'resources',
-				'dark',
-				this.getIcon(),
-			),
-		};
+		super(item, parent, 'workItem');
 
-		this.tooltip = `Assigned to: ${_workItem.fields!['System.AssignedTo']?.displayName || 'Unassigned'}\n${
-			_workItem.fields!['System.Description']
-				? '\n' + this.removeTags(_workItem.fields!['System.Description'])
+		this.tooltip = `Assigned to: ${item.fields!['System.AssignedTo']?.displayName || 'Unassigned'}\n${
+			item.fields!['System.Description']
+				? '\n' + this.removeTags(item.fields!['System.Description'])
 				: ''
 		}`;
 	}
 
+	getName() {
+		return `${this.item.id}: ${this.item.fields!['System.Title']}`;
+	}
+
+	getCollapsibleState() {
+		return this.collapsibleState;
+	}
+
+	getIconName(): string {
+		const icons: { [key: string]: string } = {
+			default: 'user-story-work-item',
+			'User Story': 'user-story-work-item',
+			Bug: 'bug-work-item',
+			Task: 'task-work-item',
+			Epic: 'epic-work-item',
+			Feature: 'feature-work-item',
+			Project: 'project-work-item',
+		};
+
+		const workItemType: string = this.item.fields!['System.WorkItemType'];
+		return icons[workItemType] || icons['default'];
+	}
+
 	getWorkItemID(): number {
-		return this._workItem.id!;
+		return this.item.id!;
 	}
 
 	getWorkItemRev(): number {
-		return this._workItem.rev!;
+		return this.item.rev!;
 	}
 
 	getColumns(): BoardColumn[] {
@@ -65,7 +66,7 @@ export class WorkItemItem extends vscode.TreeItem {
 	}
 
 	getBoardColumnFieldName(): string {
-		const fields: string[] = Object.keys(this._workItem.fields!);
+		const fields: string[] = Object.keys(this.item.fields!);
 		for (let field of fields) {
 			if (field.endsWith('_Kanban.Column')) {
 				return field;
@@ -73,21 +74,6 @@ export class WorkItemItem extends vscode.TreeItem {
 		}
 
 		return '';
-	}
-
-	private getIcon(): string {
-		const icons: { [key: string]: string } = {
-			default: 'user-story-work-item.svg',
-			'User Story': 'user-story-work-item.svg',
-			Bug: 'bug-work-item.svg',
-			Task: 'task-work-item.svg',
-			Epic: 'epic-work-item.svg',
-			Feature: 'feature-work-item.svg',
-			Project: 'project-work-item.svg',
-		};
-
-		const workItemType: string = this._workItem.fields!['System.WorkItemType'];
-		return icons[workItemType] || icons['default'];
 	}
 
 	private removeTags(str: string): string {
