@@ -1,4 +1,3 @@
-import { BacklogLevelConfiguration } from 'azure-devops-node-api/interfaces/WorkInterfaces';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
@@ -40,4 +39,5 @@ export abstract class AbstractItem<
 	abstract getName(): string;
 	abstract getCollapsibleState(): vscode.TreeItemCollapsibleState;
 	abstract getIconName(): string;
+	
 }
