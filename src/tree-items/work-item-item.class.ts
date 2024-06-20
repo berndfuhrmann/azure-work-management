@@ -18,7 +18,6 @@ export class WorkItemItem<
 	constructor(
 		item: WorkItem,
 		parent: ParentItem | undefined,
-		private _columns: BoardColumn[],
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 	) {
 		super(item, parent, 'workItem');
@@ -59,10 +58,6 @@ export class WorkItemItem<
 
 	getWorkItemRev(): number {
 		return this.item.rev!;
-	}
-
-	getColumns(): BoardColumn[] {
-		return this._columns;
 	}
 
 	getBoardColumnFieldName(): string {

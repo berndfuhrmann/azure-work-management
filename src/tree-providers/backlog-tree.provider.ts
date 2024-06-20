@@ -44,7 +44,6 @@ export class BacklogTreeProvider
 			return new WorkItemItem(
 				workItem,
 				element,
-				[],
 				vscode.TreeItemCollapsibleState.None,
 			);
 		});

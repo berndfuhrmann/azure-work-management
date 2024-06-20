@@ -39,5 +39,4 @@ export abstract class AbstractItem<
 	abstract getName(): string;
 	abstract getCollapsibleState(): vscode.TreeItemCollapsibleState;
 	abstract getIconName(): string;
-	
 }

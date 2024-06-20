@@ -61,7 +61,6 @@ export class BoardsTreeProvider
 			this._context.globalState.get('system-area-path') as string,
 		);
 		const boardColumn: string = element.getColumnName();
-		const columns: BoardColumn[] = element.parent.getColumns();
 		const workItemTypes: string[] = element.getAllowedWorkItemTypes();
 		const workItems = await this._workItemService.queryForWorkItems(
 			iterationPath,
@@ -75,7 +74,6 @@ export class BoardsTreeProvider
 				new WorkItemItem(
 					workItem,
 					element,
-					columns,
 					vscode.TreeItemCollapsibleState.None,
 				),
 		);

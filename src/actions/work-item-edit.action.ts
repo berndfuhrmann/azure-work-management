@@ -1,12 +1,13 @@
 import { BoardColumn } from 'azure-devops-node-api/interfaces/WorkInterfaces';
 import * as vscode from 'vscode';
 import { TeamService } from '../api/services/team.service';
-import { WorkItemItem } from '../tree-items/work-item-item.class';
 import { WorkItemService } from '../api/services/work-item.service';
 import { AppSettingsService } from '../services/app-settings.service';
+import { ColumnItem } from '../tree-items/column-item.class';
+import { WorkItemItem } from '../tree-items/work-item-item.class';
 
 export const chooseAction = async (
-	workItem: WorkItemItem,
+	workItem: WorkItemItem<ColumnItem>,
 	services: {
 		appSettingsService: AppSettingsService;
 		workItemService: WorkItemService;
@@ -37,7 +38,7 @@ export const chooseAction = async (
 };
 
 export const assignToAction = async (
-	workItem: WorkItemItem,
+	workItem: WorkItemItem<ColumnItem>,
 	{
 		appSettingsService,
 		workItemService,
@@ -82,14 +83,14 @@ export const assignToAction = async (
 };
 
 export const moveToBoardAction = async (
-	workItem: WorkItemItem,
+	workItem: WorkItemItem<ColumnItem>,
 	{
 		workItemService,
 	}: {
 		workItemService: WorkItemService;
 	},
 ): Promise<void | string> => {
-	const columns: BoardColumn[] = workItem.getColumns();
+	const columns: BoardColumn[] = workItem.parent!.parent.item.columns!;
 
 	const result = await vscode.window.showQuickPick(
 		columns.map((c) => c.name!),

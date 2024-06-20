@@ -11,6 +11,7 @@ import { AppSettingsService } from './services/app-settings.service';
 import { WorkItemItem } from './tree-items/work-item-item.class';
 import { BacklogTreeProvider } from './tree-providers/backlog-tree.provider';
 import { BoardsTreeProvider } from './tree-providers/board-tree.provider';
+import { ColumnItem } from './tree-items/column-item.class';
 
 export function activate(context: vscode.ExtensionContext) {
 	const appSettingsService = new AppSettingsService();
@@ -74,7 +75,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand(
 		'azure-work-management.open-work-item',
-		(workItem: WorkItemItem) => {
+		(workItem: WorkItemItem<ColumnItem>) => {
 			const organizationName: string = encodeURI(
 				appSettingsService.getOrganization(),
 			);
@@ -89,7 +90,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand(
 		'azure-work-management.edit-work-item',
-		(workItem: WorkItemItem) => {
+		(workItem: WorkItemItem<ColumnItem>) => {
 			chooseAction(workItem, {
 				appSettingsService,
 				workItemService,
