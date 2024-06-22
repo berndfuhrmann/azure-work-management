@@ -8,7 +8,7 @@ import { AppSettingsService } from '../services/app-settings.service';
 import { BoardItem } from '../tree-items/board-item.class';
 import { ColumnItem } from '../tree-items/column-item.class';
 import { WorkItemItem } from '../tree-items/work-item-item.class';
-import { AbstractTreeProvider } from './abstract-tree-provider';
+import { AbstractTreeProvider } from './abstract-tree.provider';
 
 export class BoardsTreeProvider
 	extends AbstractTreeProvider

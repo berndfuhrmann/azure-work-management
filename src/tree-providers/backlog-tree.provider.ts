@@ -3,7 +3,7 @@ import { BacklogService } from '../api/services/backlog.service';
 import { AppSettingsService } from '../services/app-settings.service';
 import { BacklogItem } from '../tree-items/backlog-item.class';
 import { WorkItemItem } from '../tree-items/work-item-item.class';
-import { AbstractTreeProvider } from './abstract-tree-provider';
+import { AbstractTreeProvider } from './abstract-tree.provider';
 
 export class BacklogTreeProvider
 	extends AbstractTreeProvider
