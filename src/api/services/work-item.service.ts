@@ -1,13 +1,21 @@
 import { WorkItem } from 'azure-devops-node-api/interfaces/WorkItemTrackingInterfaces';
 import { JsonPatchDocument } from 'azure-devops-node-api/interfaces/common/VSSInterfaces';
 import { chunk } from 'lodash';
-import { AppSettingsService } from '../../services/app-settings.service';
 
-import { getWebApi } from '../../services/api.service';
+import { WorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi';
+import { firstValueFrom, Observable } from 'rxjs';
 import { TeamFieldValue } from '../types/team-field-values.type';
+import { observableToPromise } from '../../utils/promise';
 
 export class WorkItemService {
-	constructor(private _appSettingsService: AppSettingsService) {}
+	private _teamContext!: Promise<{ project: string; team: string; }>;
+	private _workItemTrackingApi!: Promise<WorkItemTrackingApi>;
+	constructor(
+		teamContext: Observable<Promise<{project: string, team: string}>>,
+		workItemTrackingApi : Observable<Promise<WorkItemTrackingApi>>) {
+		observableToPromise(v => this._teamContext = v, teamContext);
+		observableToPromise(v => this._workItemTrackingApi = v, workItemTrackingApi);
+	}
 
 	async queryForWorkItems(
 		iterationPath: string,
@@ -29,14 +37,12 @@ export class WorkItemService {
 			query: `SELECT [System.State], [System.Title] FROM WorkItems WHERE [System.IterationPath] = '${iterationPath}' AND (${systemAreaPath}) AND (${workItemType}) AND [System.BoardColumn] = '${boardColumn}' ORDER BY [State] Asc`,
 		};
 
-		const workItemTrackingApi = await getWebApi(
-			this._appSettingsService,
-		).getWorkItemTrackingApi();
+		const workItemTrackingApi = await this._workItemTrackingApi;
 		const workItems = await workItemTrackingApi.queryByWiql(
 			{
 				query: data.query,
 			},
-			this._appSettingsService.getTeamContext(),
+			await this._teamContext
 		);
 
 		const ids =
@@ -51,9 +57,7 @@ export class WorkItemService {
 			return [];
 		}
 
-		const workItemTrackingApi = await getWebApi(
-			this._appSettingsService,
-		).getWorkItemTrackingApi();
+		const workItemTrackingApi = await this._workItemTrackingApi;
 		const chunks = chunk(ids, 200);
 
 		const result: WorkItem[] = [];
@@ -73,9 +77,7 @@ export class WorkItemService {
 		id: number,
 		changes: JsonPatchDocument,
 	): Promise<WorkItem> {
-		const workItemTrackingApi = await getWebApi(
-			this._appSettingsService,
-		).getWorkItemTrackingApi();
+		const workItemTrackingApi = await this._workItemTrackingApi;
 		return await workItemTrackingApi.updateWorkItem({}, changes, id);
 	}
 }

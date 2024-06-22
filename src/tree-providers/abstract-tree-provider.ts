@@ -33,8 +33,11 @@ export abstract class AbstractTreeProvider
 			const getChildren = this.getChildrenForContext.get(
 				element?.contextValue ?? AbstractTreeProvider.defaultKey,
 			);
-			const result = getChildren?.(element) ?? [];
-			return result;
+			try {
+				return getChildren?.(element) ?? [];
+			} catch(error) {
+				return [new vscode.TreeItem('Error',vscode.TreeItemCollapsibleState.None)];
+			}
 		}
 
 		return [];

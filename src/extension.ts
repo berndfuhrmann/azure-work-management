@@ -12,20 +12,24 @@ import { WorkItemItem } from './tree-items/work-item-item.class';
 import { BacklogTreeProvider } from './tree-providers/backlog-tree.provider';
 import { BoardsTreeProvider } from './tree-providers/board-tree.provider';
 import { ColumnItem } from './tree-items/column-item.class';
-import { webApiObservable, workApi } from './services/api.service';
+import { coreApi, webApi, workApi, workItemTrackingApi } from './services/api.service';
+import { combineLatest } from 'rxjs';
 
 export function activate(context: vscode.ExtensionContext) {
 	const appSettingsService = new AppSettingsService(context);
-	const webApiObservabl = webApiObservable(appSettingsService);
-	const workApiObservable = workApi(webApiObservabl);
-	const workItemService = new WorkItemService(appSettingsService);
+	const webApiObservable = webApi(appSettingsService);
+	const coreApiObservable = coreApi(webApiObservable);
+	const workItemTrackingApiObservable = workItemTrackingApi(webApiObservable);
+	const workApiObservable = workApi(webApiObservable);
+	
+	
+	const workItemService = new WorkItemService(appSettingsService.teamContextObservable, workItemTrackingApiObservable);
 	const backlogService = new BacklogService(
-		appSettingsService,
-		workItemService,
+		workItemService, appSettingsService.teamContextObservable, workApiObservable
 	);
-	const boardService = new BoardService(appSettingsService);
-	const iterationService = new IterationService(appSettingsService);
-	const teamService = new TeamService(appSettingsService);
+	const boardService = new BoardService(appSettingsService.teamContextObservable, workApiObservable);
+	const iterationService = new IterationService(appSettingsService.teamContextObservable, workApiObservable);
+	const teamService = new TeamService(appSettingsService.teamContextObservable, coreApiObservable);
 	const teamFieldValuesService = new TeamFieldValuesService(appSettingsService);
 	const boardTreeProvider: BoardsTreeProvider = new BoardsTreeProvider(
 		context,
@@ -38,6 +42,11 @@ export function activate(context: vscode.ExtensionContext) {
 		appSettingsService,
 		backlogService,
 	);
+
+	combineLatest([webApiObservable, appSettingsService.teamContextObservable]).subscribe(() => {
+		boardTreeProvider.refresh();
+		backlogTreeProvider.refresh();
+	});
 
 	vscode.window.registerTreeDataProvider(
 		'azure-work-management.open-boards',

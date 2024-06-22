@@ -1,22 +1,28 @@
-import { getWebApi } from '../../services/api.service';
-import { AppSettingsService } from '../../services/app-settings.service';
+import { WorkApi } from 'azure-devops-node-api/WorkApi';
+import { Observable } from 'rxjs';
+import { observableToPromise } from '../../utils/promise';
 import { WorkItemService } from './work-item.service';
 
 export class BacklogService {
+	private _teamContext!: Promise<{ project: string; team: string; }>;
+	private _workApi!: Promise<WorkApi>;
 	constructor(
-		private _appSettingsService: AppSettingsService,
 		private _workItemService: WorkItemService,
-	) {}
+		teamContext: Observable<Promise<{project: string, team: string}>>,
+		workItemTrackingApi : Observable<Promise<WorkApi>>) {
+		observableToPromise(v => this._teamContext = v, teamContext);
+		observableToPromise(v => this._workApi = v, workItemTrackingApi);
+	}
 
 	async getBacklogs() {
-		const workApi = await getWebApi(this._appSettingsService).getWorkApi();
-		return workApi.getBacklogs(this._appSettingsService.getTeamContext());
+		const workApi = await this._workApi;
+		return workApi.getBacklogs(await this._teamContext);
 	}
 
 	async getBacklogWorkItems(backlogID: string) {
-		const workApi = await getWebApi(this._appSettingsService).getWorkApi();
+		const workApi = await this._workApi;
 		const workItems = await workApi.getBacklogLevelWorkItems(
-			this._appSettingsService.getTeamContext(),
+			await this._teamContext,
 			backlogID,
 		);
 		const ids = (workItems.workItems ?? [])

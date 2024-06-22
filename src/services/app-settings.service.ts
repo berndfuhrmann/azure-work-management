@@ -44,13 +44,12 @@ export class AppSettingsService {
 			project: string;
 			team: string;
 		}>((resolve, reject) => {
-				if (settings.project && settings.team) {
-					resolve(settings);
-				} else {
-					reject();
-				}
-			})
-		)
+			if (settings.project && settings.team) {
+				resolve(settings);
+			} else {
+				reject();
+			}
+		}))
 	);
 
 	constructor(context: vscode.ExtensionContext) {

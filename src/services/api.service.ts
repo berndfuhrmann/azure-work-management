@@ -1,6 +1,5 @@
 import { getPersonalAccessTokenHandler, WebApi } from 'azure-devops-node-api';
 import {
-	BehaviorSubject,
 	map,
 	Observable,
 	ReplaySubject
@@ -14,7 +13,7 @@ export const getWebApi = (appSettingsService: AppSettingsService) => {
 	);
 };
 
-export const webApiObservable = (appSettingsService: AppSettingsService) =>
+export const webApi = (appSettingsService: AppSettingsService) =>
 	appSettingsService.settingsObservable.pipe(
 		map(
 			async (settingsPromise) => {
@@ -31,14 +30,16 @@ export const apiObservable = <T>(
 	webApiObservable: Observable<Promise<WebApi>>,
 	getApi: (webApi: Promise<WebApi>) => Promise<T>,
 ) => {
-	const subject = new ReplaySubject(1);
+	const subject = new ReplaySubject<Promise<T>>(1);
 	webApiObservable.pipe(
 		map((webApi) => getApi(webApi))
 	).subscribe(subject);
 	return subject;
-}
+};
 
 
+export const coreApi = (webApiObservable: Observable<Promise<WebApi>>) =>
+	apiObservable(webApiObservable, async (webApi) => (await webApi).getCoreApi());
 export const workItemTrackingApi = (webApiObservable: Observable<Promise<WebApi>>) =>
 	apiObservable(webApiObservable, async (webApi) => (await webApi).getWorkItemTrackingApi());
 export const workApi = (webApiObservable: Observable<Promise<WebApi>>) =>
