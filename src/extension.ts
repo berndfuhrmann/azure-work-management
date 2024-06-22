@@ -12,9 +12,12 @@ import { WorkItemItem } from './tree-items/work-item-item.class';
 import { BacklogTreeProvider } from './tree-providers/backlog-tree.provider';
 import { BoardsTreeProvider } from './tree-providers/board-tree.provider';
 import { ColumnItem } from './tree-items/column-item.class';
+import { webApiObservable, workApi } from './services/api.service';
 
 export function activate(context: vscode.ExtensionContext) {
-	const appSettingsService = new AppSettingsService();
+	const appSettingsService = new AppSettingsService(context);
+	const webApiObservabl = webApiObservable(appSettingsService);
+	const workApiObservable = workApi(webApiObservabl);
 	const workItemService = new WorkItemService(appSettingsService);
 	const backlogService = new BacklogService(
 		appSettingsService,

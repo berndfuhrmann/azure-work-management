@@ -1,8 +1,55 @@
+import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import * as vscode from 'vscode';
 
 export class AppSettingsService {
+	public static readonly configurationSection = 'azure-work-management';
+	
+	private readonly _settingsObservable = new BehaviorSubject(this.getSettings());
+	
+	private readonly _teamContextObservable = new BehaviorSubject(
+		this.getTeamContext(),
+	);
+
+	/* A stream of server settings. Completes when extension is shutting down. */
+	public settingsObservable = this._settingsObservable.pipe(distinctUntilChanged((prev, curr) => {
+		return prev.organization === curr.organization &&
+			prev.personalAccessToken === curr.personalAccessToken &&
+			prev.serverUrl === curr.serverUrl;
+	}));
+
+	/* A stream of team settings. Completes when extension is shutting down. */
+	public teamContextObservable = this._teamContextObservable.pipe(distinctUntilChanged((prev, curr) => {
+		return prev.project === curr.project &&
+			prev.team === curr.team;
+	}));
+
+	constructor(context: vscode.ExtensionContext) {
+		context.subscriptions.push(
+			vscode.workspace.onDidChangeConfiguration((e) => {
+				if (e.affectsConfiguration(AppSettingsService.configurationSection)) {
+					this._settingsObservable.next(this.getSettings());
+					this._teamContextObservable.next(this.getTeamContext());
+				}
+			}),
+			vscode.Disposable.from({ dispose: () => {
+				this._settingsObservable.complete();
+				this._teamContextObservable.complete();
+			}})
+		);
+	}
+
+	public getSettings() {
+		return {
+			serverUrl: this.getServerUrl(),
+			personalAccessToken: this.getPersonalAccessToken(),
+			organization: this.getOrganization(),
+		};
+	}
+
 	public getAppSettings() {
-		return vscode.workspace.getConfiguration('azure-work-management');
+		return vscode.workspace.getConfiguration(
+			AppSettingsService.configurationSection,
+		);
 	}
 
 	public getServerUrl() {
