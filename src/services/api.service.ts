@@ -17,17 +17,19 @@ export const getWebApi = (appSettingsService: AppSettingsService) => {
 export const webApiObservable = (appSettingsService: AppSettingsService) =>
 	appSettingsService.settingsObservable.pipe(
 		map(
-			(settings) =>
-				new WebApi(
-					`${settings.serverUrl}${settings.organization}`,
+			async (settingsPromise) => {
+				const settings = await settingsPromise;
+				return new WebApi(
+					`${await settings.serverUrl}${settings.organization}`,
 					getPersonalAccessTokenHandler(settings.personalAccessToken!),
-				),
+				);
+			}
 		),
 	);
 
 export const apiObservable = <T>(
-	webApiObservable: Observable<WebApi>,
-	getApi: (webApi: WebApi) => Promise<T>,
+	webApiObservable: Observable<Promise<WebApi>>,
+	getApi: (webApi: Promise<WebApi>) => Promise<T>,
 ) => {
 	const subject = new ReplaySubject(1);
 	webApiObservable.pipe(
@@ -37,8 +39,8 @@ export const apiObservable = <T>(
 }
 
 
-export const workItemTrackingApi = (webApiObservable: Observable<WebApi>) =>
-	apiObservable(webApiObservable, (webApi) => webApi.getWorkItemTrackingApi());
-export const workApi = (webApiObservable: Observable<WebApi>) =>
-	apiObservable(webApiObservable, (webApi) => webApi.getWorkApi());
+export const workItemTrackingApi = (webApiObservable: Observable<Promise<WebApi>>) =>
+	apiObservable(webApiObservable, async (webApi) => (await webApi).getWorkItemTrackingApi());
+export const workApi = (webApiObservable: Observable<Promise<WebApi>>) =>
+	apiObservable(webApiObservable, async (webApi) => (await webApi).getWorkApi());
 

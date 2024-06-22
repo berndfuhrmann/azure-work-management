@@ -1,4 +1,4 @@
-import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 import * as vscode from 'vscode';
 
 export class AppSettingsService {
@@ -10,18 +10,48 @@ export class AppSettingsService {
 		this.getTeamContext(),
 	);
 
-	/* A stream of server settings. Completes when extension is shutting down. */
-	public settingsObservable = this._settingsObservable.pipe(distinctUntilChanged((prev, curr) => {
-		return prev.organization === curr.organization &&
-			prev.personalAccessToken === curr.personalAccessToken &&
-			prev.serverUrl === curr.serverUrl;
-	}));
+	/** 
+	 * A stream of server settings. Completes when extension is shutting down. 
+	 */
+	public settingsObservable = this._settingsObservable.pipe(
+		distinctUntilChanged((prev, curr) => {
+			return prev.organization === curr.organization &&
+				prev.personalAccessToken === curr.personalAccessToken &&
+				prev.serverUrl === curr.serverUrl;
+		}),
+		map(settings => new Promise<{
+			serverUrl: string;
+			personalAccessToken: string;
+			organization: string;
+		}>((resolve, reject) => {
+			if (settings.organization && settings.personalAccessToken && settings.serverUrl) {
+				resolve(settings);
+			} else {
+				reject();
+			}
+		})
+	));
 
-	/* A stream of team settings. Completes when extension is shutting down. */
-	public teamContextObservable = this._teamContextObservable.pipe(distinctUntilChanged((prev, curr) => {
-		return prev.project === curr.project &&
-			prev.team === curr.team;
-	}));
+	/**
+	 * A stream of team settings. Completes when extension is shutting down. 
+	 */
+	public teamContextObservable = this._teamContextObservable.pipe(
+		distinctUntilChanged((prev, curr) => {
+			return prev.project === curr.project &&
+				prev.team === curr.team;
+		}),
+		map(settings => new Promise<{
+			project: string;
+			team: string;
+		}>((resolve, reject) => {
+				if (settings.project && settings.team) {
+					resolve(settings);
+				} else {
+					reject();
+				}
+			})
+		)
+	);
 
 	constructor(context: vscode.ExtensionContext) {
 		context.subscriptions.push(
