@@ -40,8 +40,12 @@ export const apiObservable = <T>(
 
 export const coreApi = (webApiObservable: Observable<Promise<WebApi>>) =>
 	apiObservable(webApiObservable, async (webApi) => (await webApi).getCoreApi());
+
 export const workItemTrackingApi = (webApiObservable: Observable<Promise<WebApi>>) =>
 	apiObservable(webApiObservable, async (webApi) => (await webApi).getWorkItemTrackingApi());
+
 export const workApi = (webApiObservable: Observable<Promise<WebApi>>) =>
 	apiObservable(webApiObservable, async (webApi) => (await webApi).getWorkApi());
 
+export const gitApi = (webApiObservable: Observable<Promise<WebApi>>) =>
+	apiObservable(webApiObservable, async (webApi) => (await webApi).getGitApi());

@@ -26,7 +26,7 @@ export abstract class AbstractTreeProvider
 		return element;
 	}
 
-	getChildren(
+	async getChildren(
 		element?: vscode.TreeItem | undefined,
 	): vscode.ProviderResult<vscode.TreeItem[]> {
 		if (this._appSettingsService.isValidAppSettings()) {
@@ -34,7 +34,7 @@ export abstract class AbstractTreeProvider
 				element?.contextValue ?? AbstractTreeProvider.defaultKey,
 			);
 			try {
-				return getChildren?.(element) ?? [];
+				return await getChildren?.(element) ?? [];
 			} catch(error) {
 				return [new vscode.TreeItem('Error',vscode.TreeItemCollapsibleState.None)];
 			}

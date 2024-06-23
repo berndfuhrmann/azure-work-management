@@ -12,8 +12,10 @@ import { WorkItemItem } from './tree-items/work-item-item.class';
 import { BacklogTreeProvider } from './tree-providers/backlog-tree.provider';
 import { BoardsTreeProvider } from './tree-providers/board-tree.provider';
 import { ColumnItem } from './tree-items/column-item.class';
-import { coreApi, webApi, workApi, workItemTrackingApi } from './services/api.service';
+import { coreApi, gitApi, webApi, workApi, workItemTrackingApi } from './services/api.service';
 import { combineLatest } from 'rxjs';
+import { GitTreeProvider } from './tree-providers/git-tree.provider';
+import { GitService } from './api/services/git.service';
 
 export function activate(context: vscode.ExtensionContext) {
 	const appSettingsService = new AppSettingsService(context);
@@ -21,6 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const coreApiObservable = coreApi(webApiObservable);
 	const workItemTrackingApiObservable = workItemTrackingApi(webApiObservable);
 	const workApiObservable = workApi(webApiObservable);
+	const gitApiObservable = gitApi(webApiObservable);
 	
 	
 	const workItemService = new WorkItemService(appSettingsService.teamContextObservable, workItemTrackingApiObservable);
@@ -31,6 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const iterationService = new IterationService(appSettingsService.teamContextObservable, workApiObservable);
 	const teamService = new TeamService(appSettingsService.teamContextObservable, coreApiObservable);
 	const teamFieldValuesService = new TeamFieldValuesService(appSettingsService);
+	const gitService = new GitService(appSettingsService.teamContextObservable, gitApiObservable);
 	const boardTreeProvider: BoardsTreeProvider = new BoardsTreeProvider(
 		context,
 		appSettingsService,
@@ -42,6 +46,11 @@ export function activate(context: vscode.ExtensionContext) {
 		appSettingsService,
 		backlogService,
 	);
+	const gitTreeProvider: GitTreeProvider = new GitTreeProvider(
+		context,
+		appSettingsService,
+		gitService,
+	)
 
 	combineLatest([webApiObservable, appSettingsService.teamContextObservable]).subscribe(() => {
 		boardTreeProvider.refresh();
@@ -55,6 +64,10 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.window.registerTreeDataProvider(
 		'azure-work-management.open-backlogs',
 		backlogTreeProvider,
+	);	
+	vscode.window.registerTreeDataProvider(
+		'azure-work-management.repositories',
+		gitTreeProvider,
 	);
 
 	vscode.commands.registerCommand('azure-work-management.refresh-boards', () =>

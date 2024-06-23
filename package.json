@@ -90,6 +90,12 @@
 					"name": "BackLogs",
 					"contextualTitle": "BackLogs",
 					"visibility": "collapsed"
+				},
+				{
+					"id": "azure-work-management.repositories",
+					"name": "Repositories",
+					"contextualTitle": "Repositories",
+					"visibility": "collapsed"
 				}
 			]
 		},
@@ -100,6 +106,10 @@
 			},
 			{
 				"view": "azure-work-management.open-backlogs",
+				"contents": "In order to use the Azure Work Management extension you must set some default settings.\n[Open Settings](command:azure-work-management.open-config-settings)\n[Set Iteration](command:azure-work-management.set-iteration)"
+			},
+			{
+				"view": "azure-work-management.repositories",
 				"contents": "In order to use the Azure Work Management extension you must set some default settings.\n[Open Settings](command:azure-work-management.open-config-settings)\n[Set Iteration](command:azure-work-management.set-iteration)"
 			}
 		],

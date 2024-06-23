@@ -16,7 +16,11 @@ export class BacklogService {
 
 	async getBacklogs() {
 		const workApi = await this._workApi;
-		return workApi.getBacklogs(await this._teamContext);
+		const returnValue = await workApi.getBacklogs(await this._teamContext);
+		if (returnValue === null) {
+			throw new Error("team / project not found");
+		}
+		return returnValue;
 	}
 
 	async getBacklogWorkItems(backlogID: string) {
