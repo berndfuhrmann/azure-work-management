@@ -1,6 +1,4 @@
-import { BoardColumn } from 'azure-devops-node-api/interfaces/WorkInterfaces';
 import { WorkItem } from 'azure-devops-node-api/interfaces/WorkItemTrackingInterfaces';
-import * as path from 'path';
 import * as vscode from 'vscode';
 import { AbstractItem } from './abstract-item.class';
 

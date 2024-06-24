@@ -26,7 +26,7 @@ export class GitTreeProvider
 		);
 		this.getChildrenForContext.set('repository-branches', (element: vscode.TreeItem | undefined) =>
 			this.getRepositoryBranches(element as RepositoryBranchesItem<any>));
-		this.getChildrenForContext.set('repository-branches', (element: vscode.TreeItem | undefined) =>
+		this.getChildrenForContext.set('repository-pull-requests', (element: vscode.TreeItem | undefined) =>
 			this.getRepositoryPullRequests(element as RepositoryBranchesItem<any>));
 	}
 

@@ -1,5 +1,4 @@
 import { BoardColumn } from 'azure-devops-node-api/interfaces/WorkInterfaces';
-import * as path from 'path';
 import * as vscode from 'vscode';
 import { BoardItem } from '../tree-items/board-item.class';
 import { AbstractItem } from './abstract-item.class';
