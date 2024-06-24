@@ -8,9 +8,10 @@ export class RepositoryBranchesItem<
 	constructor(
 		item: GitRepository,
 		parent: ParentItem | undefined,
+		viewId: string,
 		public collapsibleState: vscode.TreeItemCollapsibleState,
 	) {
-		super(item, parent, 'repository-branches');
+		super(item, parent, viewId, 'repository-branches');
 	}
 
 	getName() {
@@ -26,6 +27,10 @@ export class RepositoryBranchesItem<
 	}
 
 	getRepositoryId(): string {
+		return this.item.id!;
+	}
+	
+	getId() {
 		return this.item.id!;
 	}
 }

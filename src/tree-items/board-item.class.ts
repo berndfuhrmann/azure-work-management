@@ -13,9 +13,10 @@ export class BoardItem<
 	constructor(
 		private _board: Board,
 		parent: ParentItem | undefined,
+		viewId: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 	) {
-		super(_board, parent, 'board');
+		super(_board, parent, viewId, 'board');
 	}
 
 	getName() {
@@ -30,10 +31,6 @@ export class BoardItem<
 		return 'board';
 	}
 
-	getBoardID(): string {
-		return this._board.id!;
-	}
-
 	setColumns(columns: BoardColumn[]): void {
 		this._columns = columns;
 	}
@@ -41,8 +38,8 @@ export class BoardItem<
 	getColumns(): BoardColumn[] {
 		return this._columns;
 	}
-
-	getBoard(): Board {
-		return this._board;
+	
+	getId() {
+		return this.item.id!;
 	}
 }

@@ -8,9 +8,10 @@ export class RepositoryPullRequestItem<
 	constructor(
 		item: GitPullRequest,
 		parent: ParentItem | undefined,
+		viewId: string,
 		public collapsibleState: vscode.TreeItemCollapsibleState,
 	) {
-		super(item, parent, 'repository-pullrequest');
+		super(item, parent, viewId, 'repository-pullrequest');
 		this.tooltip = item.description;
 	}
 
@@ -24,5 +25,9 @@ export class RepositoryPullRequestItem<
 
 	getIconName(): string {
 		return 'git-pull-request';
+	}
+	
+	getId() {
+		return `${this.item.pullRequestId}`;
 	}
 }

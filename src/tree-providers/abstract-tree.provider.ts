@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
 import { AppSettingsService } from '../services/app-settings.service';
 import { AbstractItem } from '../tree-items/abstract-item.class';
+import { extensionName } from '../config';
 
 export abstract class AbstractTreeProvider
-	implements vscode.TreeDataProvider<vscode.TreeItem>
+	implements vscode.TreeDataProvider<vscode.TreeItem>,
+	vscode.FileDecorationProvider
 {
 	protected static defaultKey = 'default';
 	protected getChildrenForContext = new Map<
@@ -48,4 +50,25 @@ export abstract class AbstractTreeProvider
 			return element.parent;
 		}
 	}
+
+	public provideFileDecoration(uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<vscode.FileDecoration> {
+		if (uri.scheme === extensionName) {
+			
+			if (uri.authority !== this.constructor.name) {
+				return undefined;
+			}
+			return this.provideDecoration(uri.path, uri, token);
+		}
+	}
+
+	public provideDecoration(category: string, uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<vscode.FileDecoration> {
+		return undefined;
+		
+		// return {
+		// 	badge: '#',
+		// 	color: new vscode.ThemeColor('gitlens.decorations.workspaceRepoOpenForegroundColor'),
+		// 	tooltip: '',
+		// };
+	}
 }
+ 

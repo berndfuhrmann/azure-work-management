@@ -8,9 +8,10 @@ export class RepositoryPullRequestsItem<
 	constructor(
 		item: GitRepository,
 		parent: ParentItem | undefined,
+		viewId: string,
 		public collapsibleState: vscode.TreeItemCollapsibleState,
 	) {
-		super(item, parent, 'repository-pull-requests');
+		super(item, parent, viewId, 'repository-pull-requests');
 	}
 
 	getName() {
@@ -26,6 +27,10 @@ export class RepositoryPullRequestsItem<
 	}
 
 	getRepositoryId(): string {
+		return this.item.id!;
+	}
+	
+	getId() {
 		return this.item.id!;
 	}
 }

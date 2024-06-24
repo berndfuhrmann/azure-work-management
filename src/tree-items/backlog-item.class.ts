@@ -8,9 +8,10 @@ export class BacklogItem<
 	constructor(
 		item: BacklogLevelConfiguration,
 		parent: ParentItem | undefined,
+		viewId: string,
 		public collapsibleState: vscode.TreeItemCollapsibleState,
 	) {
-		super(item, parent, 'backlog');
+		super(item, parent, viewId, 'backlog');
 	}
 
 	getName() {
@@ -31,5 +32,9 @@ export class BacklogItem<
 
 	getBacklog(): BacklogLevelConfiguration {
 		return this.item;
+	}
+
+	getId() {
+		return this.item.id!;
 	}
 }

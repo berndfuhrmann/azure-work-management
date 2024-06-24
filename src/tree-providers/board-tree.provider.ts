@@ -37,19 +37,21 @@ export class BoardsTreeProvider
 			return new BoardItem(
 				board,
 				undefined,
+				this.constructor.name,
 				vscode.TreeItemCollapsibleState.Collapsed,
 			);
 		});
 	}
 
 	private async getColumns(element: BoardItem<any>) {
-		const columns = await this._boardService.getColumns(element.getBoardID());
+		const columns = await this._boardService.getColumns(element.item.id!);
 		element.setColumns(columns);
 
 		return columns.map((column) => {
 			return new ColumnItem(
 				column,
 				element,
+				this.constructor.name,
 				vscode.TreeItemCollapsibleState.Collapsed,
 			);
 		});
@@ -60,7 +62,7 @@ export class BoardsTreeProvider
 		const systemAreaPaths: TeamFieldValue[] = JSON.parse(
 			this._context.globalState.get('system-area-path') as string,
 		);
-		const boardColumn: string = element.getColumnName();
+		const boardColumn: string = element.item.name!;
 		const workItemTypes: string[] = element.getAllowedWorkItemTypes();
 		const workItems = await this._workItemService.queryForWorkItems(
 			iterationPath,
@@ -74,6 +76,7 @@ export class BoardsTreeProvider
 				new WorkItemItem(
 					workItem,
 					element,
+					this.constructor.name,
 					vscode.TreeItemCollapsibleState.None,
 				),
 		);

@@ -16,15 +16,17 @@ export class WorkItemItem<
 	constructor(
 		item: WorkItem,
 		parent: ParentItem | undefined,
+		viewId: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 	) {
-		super(item, parent, 'workItem');
+		super(item, parent, viewId, 'workItem');
 
 		this.tooltip = `Assigned to: ${item.fields!['System.AssignedTo']?.displayName || 'Unassigned'}\n${
 			item.fields!['System.Description']
 				? '\n' + this.removeTags(item.fields!['System.Description'])
 				: ''
 		}`;
+		this.resourceUri = vscode.Uri.parse(item.url!);
 	}
 
 	getName() {
@@ -75,5 +77,9 @@ export class WorkItemItem<
 		}
 
 		return str.replace(/(<([^>]+)>)/gi, '');
+	}
+	
+	getId() {
+		return `${this.item.id}`;
 	}
 }

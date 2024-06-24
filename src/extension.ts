@@ -56,19 +56,23 @@ export function activate(context: vscode.ExtensionContext) {
 		boardTreeProvider.refresh();
 		backlogTreeProvider.refresh();
 	});
-
 	vscode.window.registerTreeDataProvider(
 		'azure-work-management.open-boards',
 		boardTreeProvider,
 	);
+	vscode.window.registerFileDecorationProvider(boardTreeProvider);
+	
 	vscode.window.registerTreeDataProvider(
 		'azure-work-management.open-backlogs',
 		backlogTreeProvider,
 	);	
+	vscode.window.registerFileDecorationProvider(backlogTreeProvider);
+
 	vscode.window.registerTreeDataProvider(
 		'azure-work-management.repositories',
 		gitTreeProvider,
 	);
+	vscode.window.registerFileDecorationProvider(gitTreeProvider);
 
 	vscode.commands.registerCommand('azure-work-management.refresh-boards', () =>
 		boardTreeProvider.refresh(),

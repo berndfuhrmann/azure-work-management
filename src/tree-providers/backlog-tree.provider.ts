@@ -23,6 +23,8 @@ export class BacklogTreeProvider
 		);
 		this.getChildrenForContext.set('workItem', () => Promise.resolve([]));
 	}
+	
+
 
 	private async getBacklogs() {
 		const backlogs = await this._backlogService.getBacklogs();
@@ -31,6 +33,7 @@ export class BacklogTreeProvider
 				new BacklogItem(
 					backlog,
 					undefined,
+					this.constructor.name,
 					vscode.TreeItemCollapsibleState.Collapsed,
 				),
 		);
@@ -44,6 +47,7 @@ export class BacklogTreeProvider
 			return new WorkItemItem(
 				workItem,
 				element,
+				this.constructor.name,
 				vscode.TreeItemCollapsibleState.None,
 			);
 		});

@@ -7,9 +7,10 @@ export class ColumnItem extends AbstractItem<BoardColumn, BoardItem<any>> {
 	constructor(
 		item: BoardColumn,
 		parent: BoardItem<any>,
+		viewId: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 	) {
-		super(item, parent, 'column');
+		super(item, parent, viewId, 'column');
 	}
 
 	getName() {
@@ -24,15 +25,11 @@ export class ColumnItem extends AbstractItem<BoardColumn, BoardItem<any>> {
 		return 'board-column';
 	}
 
-	getColumnID(): string {
-		return this.item.id!;
-	}
-
-	getColumnName(): string {
-		return this.item.name!;
-	}
-
 	getAllowedWorkItemTypes(): string[] {
 		return Object.keys(this.item.stateMappings!);
+	}
+	
+	getId() {
+		return this.item.id!;
 	}
 }

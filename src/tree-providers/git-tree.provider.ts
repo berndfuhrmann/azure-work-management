@@ -37,6 +37,7 @@ export class GitTreeProvider
 				new RepositoryItem(
 					gitRepository,
 					undefined,
+					this.constructor.name,
 					vscode.TreeItemCollapsibleState.Collapsed,
 				),
 		);
@@ -44,22 +45,30 @@ export class GitTreeProvider
 
 	private async getRepositoryItems(element: RepositoryItem<any>) {
 		return [
-			new RepositoryBranchesItem(element.item, element, vscode.TreeItemCollapsibleState.Collapsed),
-			new RepositoryPullRequestsItem(element.item, element, vscode.TreeItemCollapsibleState.Collapsed),
+			new RepositoryBranchesItem(element.item, element, this.constructor.name, vscode.TreeItemCollapsibleState.Collapsed),
+			new RepositoryPullRequestsItem(element.item, element, this.constructor.name, vscode.TreeItemCollapsibleState.Collapsed),
 		];
 	}
 
 	private async getRepositoryBranches(element: RepositoryBranchesItem<any>) {
 		const branches = this._gitService.getBranches(element.getRepositoryId());
 		return (await branches).map(
-			branch => new RepositoryBranchItem(branch, element, vscode.TreeItemCollapsibleState.None)
+			branch => new RepositoryBranchItem(branch, element, this.constructor.name, vscode.TreeItemCollapsibleState.None)
 		);
 	}
 
 	private async getRepositoryPullRequests(element: RepositoryPullRequestsItem<any>) {
 		const pullRequests = this._gitService.getPullRequests(element.getRepositoryId());
 		return (await pullRequests).map(
-			pullRequest => new RepositoryPullRequestItem(pullRequest, element, vscode.TreeItemCollapsibleState.None)
+			pullRequest => new RepositoryPullRequestItem(pullRequest, element, this.constructor.name, vscode.TreeItemCollapsibleState.None)
 		);
+	}
+
+	public provideDecoration(category: string, uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<vscode.FileDecoration> {
+		return {
+			badge: '#',
+			color: new vscode.ThemeColor('gitlens.decorations.workspaceRepoOpenForegroundColor'),
+			tooltip: '',
+		};
 	}
 }
