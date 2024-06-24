@@ -28,7 +28,7 @@ export abstract class AbstractTreeProvider
 
 	async getChildren(
 		element?: vscode.TreeItem | undefined,
-	): vscode.ProviderResult<vscode.TreeItem[]> {
+	): Promise<vscode.TreeItem[]> {
 		if (this._appSettingsService.isValidAppSettings()) {
 			const getChildren = this.getChildrenForContext.get(
 				element?.contextValue ?? AbstractTreeProvider.defaultKey,

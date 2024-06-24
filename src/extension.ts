@@ -50,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
 		context,
 		appSettingsService,
 		gitService,
-	)
+	);
 
 	combineLatest([webApiObservable, appSettingsService.teamContextObservable]).subscribe(() => {
 		boardTreeProvider.refresh();

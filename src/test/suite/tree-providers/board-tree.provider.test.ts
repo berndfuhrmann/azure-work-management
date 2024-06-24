@@ -10,7 +10,7 @@ import { mockAppSettingService } from '../../helpers/mockAppSettingService';
 import { BoardItem } from '../../../tree-items/board-item.class';
 
 suite('BoardTreeProvider', () => {
-	test('invalid configuration returns empty list', () => {
+	test('invalid configuration returns empty list', async () => {
 		const context = {} as vscode.ExtensionContext;
 		const appSettingsService = mockAppSettingService;
 		const boardService = {} as BoardService;
@@ -21,7 +21,7 @@ suite('BoardTreeProvider', () => {
 			boardService,
 			workItemService,
 		);
-		const children = subject.getChildren();
+		const children = await subject.getChildren();
 		assert.deepEqual(children, []);
 	});
 
@@ -46,7 +46,7 @@ suite('BoardTreeProvider', () => {
 			boardService,
 			workItemService,
 		);
-		const children = await (subject.getChildren() as Promise<BoardItem[]>);
+		const children = await (subject.getChildren() as Promise<BoardItem<any>[]>);
 		assert.equal(children.length, 1);
 		assert.deepEqual(children[0].label, 'test-board1');
 	});
