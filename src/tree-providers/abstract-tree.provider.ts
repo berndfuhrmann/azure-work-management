@@ -52,23 +52,24 @@ export abstract class AbstractTreeProvider
 	}
 
 	public provideFileDecoration(uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<vscode.FileDecoration> {
-		if (uri.scheme === extensionName) {
+		if (uri.scheme === extensionName && uri.path[0] === '/') {
 			
 			if (uri.authority !== this.constructor.name) {
 				return undefined;
 			}
-			return this.provideDecoration(uri.path, uri, token);
+			const query = {} as Record<string, (string|boolean)[]>;
+			for(const pair of uri.query.split('&')) {
+				const keyAndValue = pair.split('=', 2);
+				const key = keyAndValue[0];
+				query[key] ??= [];
+				query[key].push(keyAndValue[1] ?? true);
+			}
+			return this.provideDecoration(uri.path.substring(1), query, uri, token);
 		}
 	}
 
-	public provideDecoration(category: string, uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<vscode.FileDecoration> {
+	public provideDecoration(category: string, query:Record<string, (string|boolean)[]>, uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<vscode.FileDecoration> {
 		return undefined;
-		
-		// return {
-		// 	badge: '#',
-		// 	color: new vscode.ThemeColor('gitlens.decorations.workspaceRepoOpenForegroundColor'),
-		// 	tooltip: '',
-		// };
 	}
 }
  

@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 import { GitService } from '../api/services/git.service';
 import { AppSettingsService } from '../services/app-settings.service';
-import { RepositoryItem } from '../tree-items/repository-item.class';
-import { AbstractTreeProvider } from './abstract-tree.provider';
-import { RepositoryBranchesItem } from '../tree-items/repository-branches-item.class';
-import { RepositoryPullRequestsItem } from '../tree-items/repository-pull-requests-item.class';
 import { RepositoryBranchItem } from '../tree-items/repository-branch-item.class';
+import { RepositoryBranchesItem } from '../tree-items/repository-branches-item.class';
+import { RepositoryItem } from '../tree-items/repository-item.class';
 import { RepositoryPullRequestItem } from '../tree-items/repository-pull-request-item.class';
+import { RepositoryPullRequestsItem } from '../tree-items/repository-pull-requests-item.class';
+import { AbstractTreeProvider } from './abstract-tree.provider';
 
 export class GitTreeProvider
 	extends AbstractTreeProvider
@@ -64,11 +64,30 @@ export class GitTreeProvider
 		);
 	}
 
-	public provideDecoration(category: string, uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<vscode.FileDecoration> {
-		return {
-			badge: '#',
-			color: new vscode.ThemeColor('gitlens.decorations.workspaceRepoOpenForegroundColor'),
-			tooltip: '',
-		};
+	private static readonly pullRequestMergeStatusColors = {
+		'0': undefined, //new vscode.ThemeColor('list.errorForeground'),
+		'1': new vscode.ThemeColor('list.errorForeground'),
+		'2': new vscode.ThemeColor('list.warningForeground'),
+		'3': undefined, //new vscode.ThemeColor('list.errorForeground'),
+		'4': new vscode.ThemeColor('list.errorForeground'),
+		'5': new vscode.ThemeColor('list.errorForeground'),
+	};
+
+	public provideDecoration(category: string, query:Record<string, (string|boolean)[]>, uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<vscode.FileDecoration> {
+		switch(category) {
+			case 'repository-pullrequest':
+				const index = query['mergeStatus'][0] as '0' | '1' | '2' | '3' | '4' | '5';
+				const color = GitTreeProvider.pullRequestMergeStatusColors[index];
+				if (color) {
+					return {
+						badge: '#',
+						color,
+						tooltip: '',
+					};
+				}
+				break;
+		}
+		return undefined;
+		
 	}
 }

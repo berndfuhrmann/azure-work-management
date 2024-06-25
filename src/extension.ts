@@ -103,6 +103,15 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	vscode.commands.registerCommand(
+		'azure-work-management.open-item',
+		(url: string) => {
+			vscode.env.openExternal(
+				vscode.Uri.parse(url),
+			);
+		},
+	);
+
+	vscode.commands.registerCommand(
 		'azure-work-management.open-work-item',
 		(workItem: WorkItemItem<ColumnItem>) => {
 			const organizationName: string = encodeURI(

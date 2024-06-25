@@ -38,8 +38,17 @@ export abstract class AbstractItem<
 		} else {
 			this.iconPath = undefined;
 		}
-		this.id = this.getId();
+		this.id = `${this.constructor.name}#${this.getId()}`;
 		this.resourceUri = vscode.Uri.parse(this.getResourceUri());
+
+		const webUrl = this.getItemWebUrl();
+		if (webUrl !== undefined) {
+			this.command = {
+				title: 'Open Item',
+				command: 'azure-work-management.open-item',
+				arguments: [webUrl],
+			};
+		}
 	}
 
 	abstract getName(): string;
@@ -49,5 +58,9 @@ export abstract class AbstractItem<
 
 	getResourceUri() {
 		return `${extensionName}://${this.viewId}/${this.contextValue}?id=${encodeURIComponent(this.getId())}`;
+	}
+
+	getItemWebUrl(): string | undefined {
+		return undefined;
 	}
 }
