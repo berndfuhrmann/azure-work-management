@@ -41,14 +41,14 @@ export abstract class AbstractItem<
 		this.id = `${this.constructor.name}#${this.getId()}`;
 		this.resourceUri = vscode.Uri.parse(this.getResourceUri());
 
-		const webUrl = this.getItemWebUrl();
+		/*const webUrl = this.getItemWebUrl();
 		if (webUrl !== undefined) {
 			this.command = {
 				title: 'Open Item',
 				command: 'azure-work-management.open-item',
 				arguments: [webUrl],
 			};
-		}
+		}*/
 	}
 
 	abstract getName(): string;

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { AppSettingsService } from '../services/app-settings.service';
 import { AbstractItem } from '../tree-items/abstract-item.class';
 import { extensionName } from '../config';
+import { ErrorItem } from '../tree-items/error-item.class';
 
 export abstract class AbstractTreeProvider
 	implements vscode.TreeDataProvider<vscode.TreeItem>,
@@ -38,7 +39,9 @@ export abstract class AbstractTreeProvider
 			try {
 				return await getChildren?.(element) ?? [];
 			} catch(error) {
-				return [new vscode.TreeItem('Error',vscode.TreeItemCollapsibleState.None)];
+				
+				return [new ErrorItem(error, element as AbstractItem<any, any>, this.constructor.name)];
+				
 			}
 		}
 

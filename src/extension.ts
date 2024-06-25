@@ -104,24 +104,20 @@ export function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand(
 		'azure-work-management.open-item',
-		(url: string) => {
-			vscode.env.openExternal(
-				vscode.Uri.parse(url),
-			);
-		},
-	);
+		(treeViewItem) => {
+			let url: string | undefined;
+			if (treeViewItem instanceof WorkItemItem) {
+				const organizationName: string = encodeURI(
+					appSettingsService.getOrganization(),
+				);
+				const projectName: string = encodeURI(appSettingsService.getProject());
+				url = `${appSettingsService.getServerUrl()}${organizationName}/${projectName}/_workitems/edit/${treeViewItem.getWorkItemID()}`;
+			} else {
+				url = treeViewItem.getItemWebUrl();
+			}
 
-	vscode.commands.registerCommand(
-		'azure-work-management.open-work-item',
-		(workItem: WorkItemItem<ColumnItem>) => {
-			const organizationName: string = encodeURI(
-				appSettingsService.getOrganization(),
-			);
-			const projectName: string = encodeURI(appSettingsService.getProject());
 			vscode.env.openExternal(
-				vscode.Uri.parse(
-					`${appSettingsService.getServerUrl()}${organizationName}/${projectName}/_workitems/edit/${workItem.getWorkItemID()}`,
-				),
+				vscode.Uri.parse(url!),
 			);
 		},
 	);

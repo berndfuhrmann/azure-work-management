@@ -1,8 +1,8 @@
 import { GitPullRequest } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import * as vscode from 'vscode';
 import { AbstractItem } from './abstract-item.class';
-import { mdEscape } from '../utils/mdEscape';
-
+import { refToDisplayString } from '../utils/refUtils';
+import markdownEscape from 'markdown-escape';
 export class RepositoryPullRequestItem<
 	ParentItem extends AbstractItem<any, any>,
 > extends AbstractItem<GitPullRequest, ParentItem | undefined> {
@@ -13,9 +13,25 @@ export class RepositoryPullRequestItem<
 		public collapsibleState: vscode.TreeItemCollapsibleState,
 	) {
 		super(item, parent, viewId, 'repository-pullrequest');
-		this.tooltip = `Author: ${mdEscape(item.createdBy?.displayName)}\nRequest to merge ${mdEscape(item.sourceRefName)} to ${mdEscape(item.targetRefName)}
-		Created: ${mdEscape(item.creationDate?.toLocaleString())}
-		${item.description}`;
+		this.tooltip = new vscode.MarkdownString()
+			.appendText('Author: ')
+			.appendMarkdown('`')
+			.appendText(item.createdBy!.displayName!)
+			.appendMarkdown('`')
+			.appendText('\n')
+			.appendText('Request to merge ')
+			.appendMarkdown('`')
+			.appendText(refToDisplayString(this.item.sourceRefName))
+			.appendMarkdown('`')
+			.appendText(' to ')
+			.appendMarkdown('`')
+			.appendText(refToDisplayString(item.targetRefName))
+			.appendMarkdown('`')
+			.appendText('\n')
+			.appendText('Created: ')
+			.appendMarkdown(`== ${markdownEscape(item.creationDate!.toLocaleString())} ==`)
+			.appendText('\n')
+			.appendText(item.description ?? 'description missing');
 	}
 
 	getName() {

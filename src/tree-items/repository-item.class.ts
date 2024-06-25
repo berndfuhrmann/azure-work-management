@@ -1,7 +1,7 @@
 import { GitRepository } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import * as vscode from 'vscode';
 import { AbstractItem } from './abstract-item.class';
-import { mdEscape } from '../utils/mdEscape';
+import { refToDisplayString } from '../utils/refUtils';
 
 export class RepositoryItem<
 	ParentItem extends AbstractItem<any, any>,
@@ -13,8 +13,16 @@ export class RepositoryItem<
 		public collapsibleState: vscode.TreeItemCollapsibleState,
 	) {
 		super(item, parent, viewId, 'repository');
-		this.tooltip = `Default branch: ${mdEscape(this.item.defaultBranch)}
-		Size: ${this.item.size}`;
+		this.tooltip = new vscode.MarkdownString()
+			.appendText('Default branch: ')
+			.appendMarkdown("`")
+			.appendText(refToDisplayString(this.item.defaultBranch))
+			.appendMarkdown("`")
+			.appendText("\n")
+			.appendText('Size: ')
+			.appendMarkdown("`")
+			.appendText(''+(this.item.size ?? 'unknown size') )
+			.appendMarkdown("`");
 	}
 
 	getName() {
