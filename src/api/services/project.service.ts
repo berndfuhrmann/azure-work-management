@@ -4,11 +4,10 @@ import { observableToPromise } from '../../utils/promise';
 
 export class ProjectService {
 	private _coreApi!: Promise<CoreApi>;
-	constructor(
-		coreApi : Observable<Promise<CoreApi>>) {
-		observableToPromise(v => this._coreApi = v, coreApi);
+	constructor(coreApi: Observable<Promise<CoreApi>>) {
+		observableToPromise((v) => (this._coreApi = v), coreApi);
 	}
-	
+
 	async getProjects() {
 		const coreApi = await this._coreApi;
 		return coreApi.getProjects();

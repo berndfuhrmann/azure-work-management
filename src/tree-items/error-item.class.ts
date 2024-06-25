@@ -6,14 +6,10 @@ import { randomUUID } from 'crypto';
 export class ErrorItem<
 	ParentItem extends AbstractItem<any, any>,
 > extends AbstractItem<BacklogLevelConfiguration, ParentItem | undefined> {
-	constructor(
-		item: any,
-		parent: ParentItem | undefined,
-		viewId: string,
-	) {
+	constructor(item: any, parent: ParentItem | undefined, viewId: string) {
 		super(item, parent, viewId, 'error');
 		if (item instanceof Error) {
-			this.tooltip = item.message+"\n"+item.stack;
+			this.tooltip = item.message + '\n' + item.stack;
 		}
 	}
 

@@ -18,13 +18,16 @@ export class WorkItemItem<
 
 		this.tooltip = new vscode.MarkdownString()
 			.appendText('Assigned to:')
-			.appendMarkdown(` == ${item.fields!['System.AssignedTo']?.displayName || 'Unassigned'} == `)
+			.appendMarkdown(
+				` == ${item.fields!['System.AssignedTo']?.displayName || 'Unassigned'} == `,
+			)
 			.appendText('\n')
-			.appendText(item.fields!['System.Description']
+			.appendText(
+				item.fields!['System.Description']
+					? '\n' + removeTags(item.fields!['System.Description'])
+					: '',
+			);
 
-				? '\n' + removeTags(item.fields!['System.Description'])
-				: '');
-		
 		this.resourceUri = vscode.Uri.parse(item.url!);
 	}
 
@@ -70,8 +73,6 @@ export class WorkItemItem<
 		return '';
 	}
 
-
-	
 	getId() {
 		return `${this.item.id}`;
 	}

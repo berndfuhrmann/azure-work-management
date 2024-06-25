@@ -12,7 +12,7 @@ export class WorkItemCommentItem<
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 	) {
 		super(item, parent, viewId, 'workItemComment');
-		this.tooltip = new vscode.MarkdownString().appendMarkdown(item.text??'');
+		this.tooltip = new vscode.MarkdownString().appendMarkdown(item.text ?? '');
 		this.tooltip.supportHtml = true;
 	}
 
@@ -27,7 +27,7 @@ export class WorkItemCommentItem<
 	getIconName(): string {
 		return 'message-dots';
 	}
-	
+
 	getId() {
 		return `${this.item.workItemId}-${this.item.id}`;
 	}

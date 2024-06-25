@@ -15,7 +15,7 @@ export class RepositoryPullRequestsItem<
 	}
 
 	getName() {
-		return "Pull Requests";
+		return 'Pull Requests';
 	}
 
 	getCollapsibleState() {
@@ -29,7 +29,7 @@ export class RepositoryPullRequestsItem<
 	getRepositoryId(): string {
 		return this.item.id!;
 	}
-	
+
 	getId() {
 		return this.item.id!;
 	}

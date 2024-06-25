@@ -12,7 +12,13 @@ import { WorkItemItem } from './tree-items/work-item-item.class';
 import { BacklogTreeProvider } from './tree-providers/backlog-tree.provider';
 import { BoardsTreeProvider } from './tree-providers/board-tree.provider';
 import { ColumnItem } from './tree-items/column-item.class';
-import { coreApi, gitApi, webApi, workApi, workItemTrackingApi } from './services/api.service';
+import {
+	coreApi,
+	gitApi,
+	webApi,
+	workApi,
+	workItemTrackingApi,
+} from './services/api.service';
 import { combineLatest } from 'rxjs';
 import { GitTreeProvider } from './tree-providers/git-tree.provider';
 import { GitService } from './api/services/git.service';
@@ -24,17 +30,33 @@ export function activate(context: vscode.ExtensionContext) {
 	const workItemTrackingApiObservable = workItemTrackingApi(webApiObservable);
 	const workApiObservable = workApi(webApiObservable);
 	const gitApiObservable = gitApi(webApiObservable);
-	
-	
-	const workItemService = new WorkItemService(appSettingsService.teamContextObservable, workItemTrackingApiObservable);
-	const backlogService = new BacklogService(
-		workItemService, appSettingsService.teamContextObservable, workApiObservable
+
+	const workItemService = new WorkItemService(
+		appSettingsService.teamContextObservable,
+		workItemTrackingApiObservable,
 	);
-	const boardService = new BoardService(appSettingsService.teamContextObservable, workApiObservable);
-	const iterationService = new IterationService(appSettingsService.teamContextObservable, workApiObservable);
-	const teamService = new TeamService(appSettingsService.teamContextObservable, coreApiObservable);
+	const backlogService = new BacklogService(
+		workItemService,
+		appSettingsService.teamContextObservable,
+		workApiObservable,
+	);
+	const boardService = new BoardService(
+		appSettingsService.teamContextObservable,
+		workApiObservable,
+	);
+	const iterationService = new IterationService(
+		appSettingsService.teamContextObservable,
+		workApiObservable,
+	);
+	const teamService = new TeamService(
+		appSettingsService.teamContextObservable,
+		coreApiObservable,
+	);
 	const teamFieldValuesService = new TeamFieldValuesService(appSettingsService);
-	const gitService = new GitService(appSettingsService.teamContextObservable, gitApiObservable);
+	const gitService = new GitService(
+		appSettingsService.teamContextObservable,
+		gitApiObservable,
+	);
 	const boardTreeProvider: BoardsTreeProvider = new BoardsTreeProvider(
 		context,
 		appSettingsService,
@@ -45,7 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
 		context,
 		appSettingsService,
 		backlogService,
-		workItemService
+		workItemService,
 	);
 	const gitTreeProvider: GitTreeProvider = new GitTreeProvider(
 		context,
@@ -54,7 +76,10 @@ export function activate(context: vscode.ExtensionContext) {
 		workItemService,
 	);
 
-	combineLatest([webApiObservable, appSettingsService.teamContextObservable]).subscribe(() => {
+	combineLatest([
+		webApiObservable,
+		appSettingsService.teamContextObservable,
+	]).subscribe(() => {
 		boardTreeProvider.refresh();
 		backlogTreeProvider.refresh();
 	});
@@ -63,11 +88,11 @@ export function activate(context: vscode.ExtensionContext) {
 		boardTreeProvider,
 	);
 	vscode.window.registerFileDecorationProvider(boardTreeProvider);
-	
+
 	vscode.window.registerTreeDataProvider(
 		'azure-work-management.open-backlogs',
 		backlogTreeProvider,
-	);	
+	);
 	vscode.window.registerFileDecorationProvider(backlogTreeProvider);
 
 	vscode.window.registerTreeDataProvider(
@@ -118,9 +143,7 @@ export function activate(context: vscode.ExtensionContext) {
 				url = treeViewItem.getItemWebUrl();
 			}
 
-			vscode.env.openExternal(
-				vscode.Uri.parse(url!),
-			);
+			vscode.env.openExternal(vscode.Uri.parse(url!));
 		},
 	);
 

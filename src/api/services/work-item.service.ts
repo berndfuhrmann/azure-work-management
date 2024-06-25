@@ -8,13 +8,17 @@ import { TeamFieldValue } from '../types/team-field-values.type';
 import { observableToPromise } from '../../utils/promise';
 
 export class WorkItemService {
-	private _teamContext!: Promise<{ project: string; team: string; }>;
+	private _teamContext!: Promise<{ project: string; team: string }>;
 	private _workItemTrackingApi!: Promise<WorkItemTrackingApi>;
 	constructor(
-		teamContext: Observable<Promise<{project: string, team: string}>>,
-		workItemTrackingApi : Observable<Promise<WorkItemTrackingApi>>) {
-		observableToPromise(v => this._teamContext = v, teamContext);
-		observableToPromise(v => this._workItemTrackingApi = v, workItemTrackingApi);
+		teamContext: Observable<Promise<{ project: string; team: string }>>,
+		workItemTrackingApi: Observable<Promise<WorkItemTrackingApi>>,
+	) {
+		observableToPromise((v) => (this._teamContext = v), teamContext);
+		observableToPromise(
+			(v) => (this._workItemTrackingApi = v),
+			workItemTrackingApi,
+		);
 	}
 
 	async queryForWorkItems(
@@ -42,7 +46,7 @@ export class WorkItemService {
 			{
 				query: data.query,
 			},
-			await this._teamContext
+			await this._teamContext,
 		);
 
 		const ids =
@@ -73,14 +77,18 @@ export class WorkItemService {
 		return result;
 	}
 
-	async getComments(
-		id: number
-	) {
+	async getComments(id: number) {
 		const [teamContext, workItemTrackingApi] = await Promise.all([
 			this._teamContext,
 			this._workItemTrackingApi,
 		]);
-		return await workItemTrackingApi.getComments(teamContext.project, id, undefined, undefined, false );
+		return await workItemTrackingApi.getComments(
+			teamContext.project,
+			id,
+			undefined,
+			undefined,
+			false,
+		);
 	}
 
 	async updateWorkItem(

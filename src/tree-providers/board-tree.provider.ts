@@ -1,4 +1,3 @@
-import { BoardColumn } from 'azure-devops-node-api/interfaces/WorkInterfaces';
 import * as vscode from 'vscode';
 import { BoardService } from '../api/services/board.service';
 import { TeamFieldValue } from '../api/types/team-field-values.type';
@@ -22,7 +21,9 @@ export class BoardsTreeProvider
 		private _workItemService: WorkItemService,
 	) {
 		super(_appSettingsService);
-		const workItemPartTreeProvider = new WorkItemPartTreeProvider(_workItemService);
+		const workItemPartTreeProvider = new WorkItemPartTreeProvider(
+			_workItemService,
+		);
 		workItemPartTreeProvider.add(this.getChildrenForContext);
 
 		this.getChildrenForContext.set('default', (_element) => this.getBoards());

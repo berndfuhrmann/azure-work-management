@@ -25,7 +25,7 @@ export class RepositoryBranchItem<
 	getIconName(): string {
 		return 'git-branch';
 	}
-	
+
 	getId() {
 		return this.item.name!;
 	}

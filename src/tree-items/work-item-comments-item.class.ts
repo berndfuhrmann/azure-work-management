@@ -52,7 +52,7 @@ export class WorkItemCommentsItem<
 
 		return str.replace(/(<([^>]+)>)/gi, '');
 	}
-	
+
 	getId() {
 		return `${this.item.id}`;
 	}

@@ -3,53 +3,66 @@ import * as vscode from 'vscode';
 
 export class AppSettingsService {
 	public static readonly configurationSection = 'azure-work-management';
-	
-	private readonly _settingsObservable = new BehaviorSubject(this.getSettings());
-	
+
+	private readonly _settingsObservable = new BehaviorSubject(
+		this.getSettings(),
+	);
+
 	private readonly _teamContextObservable = new BehaviorSubject(
 		this.getTeamContext(),
 	);
 
-	/** 
-	 * A stream of server settings. Completes when extension is shutting down. 
+	/**
+	 * A stream of server settings. Completes when extension is shutting down.
 	 */
 	public settingsObservable = this._settingsObservable.pipe(
 		distinctUntilChanged((prev, curr) => {
-			return prev.organization === curr.organization &&
+			return (
+				prev.organization === curr.organization &&
 				prev.personalAccessToken === curr.personalAccessToken &&
-				prev.serverUrl === curr.serverUrl;
+				prev.serverUrl === curr.serverUrl
+			);
 		}),
-		map(settings => new Promise<{
-			serverUrl: string;
-			personalAccessToken: string;
-			organization: string;
-		}>((resolve, reject) => {
-			if (settings.organization && settings.personalAccessToken && settings.serverUrl) {
-				resolve(settings);
-			} else {
-				reject();
-			}
-		})
-	));
+		map(
+			(settings) =>
+				new Promise<{
+					serverUrl: string;
+					personalAccessToken: string;
+					organization: string;
+				}>((resolve, reject) => {
+					if (
+						settings.organization &&
+						settings.personalAccessToken &&
+						settings.serverUrl
+					) {
+						resolve(settings);
+					} else {
+						reject();
+					}
+				}),
+		),
+	);
 
 	/**
-	 * A stream of team settings. Completes when extension is shutting down. 
+	 * A stream of team settings. Completes when extension is shutting down.
 	 */
 	public teamContextObservable = this._teamContextObservable.pipe(
 		distinctUntilChanged((prev, curr) => {
-			return prev.project === curr.project &&
-				prev.team === curr.team;
+			return prev.project === curr.project && prev.team === curr.team;
 		}),
-		map(settings => new Promise<{
-			project: string;
-			team: string;
-		}>((resolve, reject) => {
-			if (settings.project && settings.team) {
-				resolve(settings);
-			} else {
-				reject();
-			}
-		}))
+		map(
+			(settings) =>
+				new Promise<{
+					project: string;
+					team: string;
+				}>((resolve, reject) => {
+					if (settings.project && settings.team) {
+						resolve(settings);
+					} else {
+						reject();
+					}
+				}),
+		),
 	);
 
 	constructor(context: vscode.ExtensionContext) {
@@ -60,10 +73,12 @@ export class AppSettingsService {
 					this._teamContextObservable.next(this.getTeamContext());
 				}
 			}),
-			vscode.Disposable.from({ dispose: () => {
-				this._settingsObservable.complete();
-				this._teamContextObservable.complete();
-			}})
+			vscode.Disposable.from({
+				dispose: () => {
+					this._settingsObservable.complete();
+					this._teamContextObservable.complete();
+				},
+			}),
 		);
 	}
 

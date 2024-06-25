@@ -29,7 +29,9 @@ export class RepositoryPullRequestItem<
 			.appendMarkdown('`')
 			.appendText('\n')
 			.appendText('Created: ')
-			.appendMarkdown(`== ${markdownEscape(item.creationDate!.toLocaleString())} ==`)
+			.appendMarkdown(
+				`== ${markdownEscape(item.creationDate!.toLocaleString())} ==`,
+			)
 			.appendText('\n')
 			.appendText(item.description ?? 'description missing');
 	}
@@ -45,7 +47,7 @@ export class RepositoryPullRequestItem<
 	getIconName(): string {
 		return 'git-pull-request';
 	}
-	
+
 	getId() {
 		return `${this.item.pullRequestId}`;
 	}

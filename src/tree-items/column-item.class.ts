@@ -28,7 +28,7 @@ export class ColumnItem extends AbstractItem<BoardColumn, BoardItem<any>> {
 	getAllowedWorkItemTypes(): string[] {
 		return Object.keys(this.item.stateMappings!);
 	}
-	
+
 	getId() {
 		return this.item.id!;
 	}

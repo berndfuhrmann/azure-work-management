@@ -15,14 +15,14 @@ export class RepositoryItem<
 		super(item, parent, viewId, 'repository');
 		this.tooltip = new vscode.MarkdownString()
 			.appendText('Default branch: ')
-			.appendMarkdown("`")
+			.appendMarkdown('`')
 			.appendText(refToDisplayString(this.item.defaultBranch))
-			.appendMarkdown("`")
-			.appendText("\n")
+			.appendMarkdown('`')
+			.appendText('\n')
 			.appendText('Size: ')
-			.appendMarkdown("`")
-			.appendText(''+(this.item.size ?? 'unknown size') )
-			.appendMarkdown("`");
+			.appendMarkdown('`')
+			.appendText('' + (this.item.size ?? 'unknown size'))
+			.appendMarkdown('`');
 	}
 
 	getName() {
@@ -40,7 +40,7 @@ export class RepositoryItem<
 	getRepositoryId(): string {
 		return this.item.id!;
 	}
-	
+
 	getId() {
 		return this.item.id!;
 	}

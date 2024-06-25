@@ -15,7 +15,7 @@ export class RepositoryBranchesItem<
 	}
 
 	getName() {
-		return "Branches";
+		return 'Branches';
 	}
 
 	getCollapsibleState() {
@@ -29,7 +29,7 @@ export class RepositoryBranchesItem<
 	getRepositoryId(): string {
 		return this.item.id!;
 	}
-	
+
 	getId() {
 		return this.item.id!;
 	}

@@ -21,19 +21,30 @@ export class GitTreeProvider
 		_workItemService: WorkItemService,
 	) {
 		super(_appSettingsService);
-		const workItemPartTreeProvider = new WorkItemPartTreeProvider(_workItemService);
+		const workItemPartTreeProvider = new WorkItemPartTreeProvider(
+			_workItemService,
+		);
 		workItemPartTreeProvider.add(this.getChildrenForContext);
 
-		this.getChildrenForContext.set('default', this.getGitRepositories.bind(this));
+		this.getChildrenForContext.set(
+			'default',
+			this.getGitRepositories.bind(this),
+		);
 		this.getChildrenForContext.set(
 			'repository',
 			(element: vscode.TreeItem | undefined) =>
 				this.getRepositoryItems(element as RepositoryItem<any>),
 		);
-		this.getChildrenForContext.set('repository-branches', (element: vscode.TreeItem | undefined) =>
-			this.getRepositoryBranches(element as RepositoryBranchesItem<any>));
-		this.getChildrenForContext.set('repository-pull-requests', (element: vscode.TreeItem | undefined) =>
-			this.getRepositoryPullRequests(element as RepositoryBranchesItem<any>));
+		this.getChildrenForContext.set(
+			'repository-branches',
+			(element: vscode.TreeItem | undefined) =>
+				this.getRepositoryBranches(element as RepositoryBranchesItem<any>),
+		);
+		this.getChildrenForContext.set(
+			'repository-pull-requests',
+			(element: vscode.TreeItem | undefined) =>
+				this.getRepositoryPullRequests(element as RepositoryBranchesItem<any>),
+		);
 	}
 
 	private async getGitRepositories() {
@@ -51,22 +62,48 @@ export class GitTreeProvider
 
 	private async getRepositoryItems(element: RepositoryItem<any>) {
 		return [
-			new RepositoryBranchesItem(element.item, element, this.constructor.name, vscode.TreeItemCollapsibleState.Collapsed),
-			new RepositoryPullRequestsItem(element.item, element, this.constructor.name, vscode.TreeItemCollapsibleState.Collapsed),
+			new RepositoryBranchesItem(
+				element.item,
+				element,
+				this.constructor.name,
+				vscode.TreeItemCollapsibleState.Collapsed,
+			),
+			new RepositoryPullRequestsItem(
+				element.item,
+				element,
+				this.constructor.name,
+				vscode.TreeItemCollapsibleState.Collapsed,
+			),
 		];
 	}
 
 	private async getRepositoryBranches(element: RepositoryBranchesItem<any>) {
 		const branches = this._gitService.getBranches(element.getRepositoryId());
 		return (await branches).map(
-			branch => new RepositoryBranchItem(branch, element, this.constructor.name, vscode.TreeItemCollapsibleState.None)
+			(branch) =>
+				new RepositoryBranchItem(
+					branch,
+					element,
+					this.constructor.name,
+					vscode.TreeItemCollapsibleState.None,
+				),
 		);
 	}
 
-	private async getRepositoryPullRequests(element: RepositoryPullRequestsItem<any>) {
-		const pullRequests = this._gitService.getPullRequests(element.getRepositoryId());
+	private async getRepositoryPullRequests(
+		element: RepositoryPullRequestsItem<any>,
+	) {
+		const pullRequests = this._gitService.getPullRequests(
+			element.getRepositoryId(),
+		);
 		return (await pullRequests).map(
-			pullRequest => new RepositoryPullRequestItem(pullRequest, element, this.constructor.name, vscode.TreeItemCollapsibleState.None)
+			(pullRequest) =>
+				new RepositoryPullRequestItem(
+					pullRequest,
+					element,
+					this.constructor.name,
+					vscode.TreeItemCollapsibleState.None,
+				),
 		);
 	}
 
@@ -79,10 +116,21 @@ export class GitTreeProvider
 		'5': new vscode.ThemeColor('list.errorForeground'),
 	};
 
-	public provideDecoration(category: string, query:Record<string, (string|boolean)[]>, uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<vscode.FileDecoration> {
-		switch(category) {
+	public provideDecoration(
+		category: string,
+		query: Record<string, (string | boolean)[]>,
+		uri: vscode.Uri,
+		token: vscode.CancellationToken,
+	): vscode.ProviderResult<vscode.FileDecoration> {
+		switch (category) {
 			case 'repository-pullrequest':
-				const index = query['mergeStatus'][0] as '0' | '1' | '2' | '3' | '4' | '5';
+				const index = query['mergeStatus'][0] as
+					| '0'
+					| '1'
+					| '2'
+					| '3'
+					| '4'
+					| '5';
 				const color = GitTreeProvider.pullRequestMergeStatusColors[index];
 				if (color) {
 					return {
@@ -94,6 +142,5 @@ export class GitTreeProvider
 				break;
 		}
 		return undefined;
-		
 	}
 }

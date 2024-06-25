@@ -33,8 +33,8 @@ export abstract class AbstractItem<
 					'resources',
 					'dark',
 					`${iconName}.svg`,
-				)
-			};	
+				),
+			};
 		} else {
 			this.iconPath = undefined;
 		}
