@@ -1,6 +1,7 @@
 import { WorkItem } from 'azure-devops-node-api/interfaces/WorkItemTrackingInterfaces';
 import * as vscode from 'vscode';
 import { AbstractItem } from './abstract-item.class';
+import { removeTags } from '../utils/stringUtils';
 
 export class WorkItemItem<
 	ParentItem extends AbstractItem<any, any>,
@@ -21,7 +22,7 @@ export class WorkItemItem<
 			.appendText('\n')
 			.appendText(item.fields!['System.Description']
 
-				? '\n' + this.removeTags(item.fields!['System.Description'])
+				? '\n' + removeTags(item.fields!['System.Description'])
 				: '');
 		
 		this.resourceUri = vscode.Uri.parse(item.url!);
@@ -69,13 +70,7 @@ export class WorkItemItem<
 		return '';
 	}
 
-	private removeTags(str: string): string {
-		if (!str) {
-			return '';
-		}
 
-		return str.replace(/(<([^>]+)>)/gi, '');
-	}
 	
 	getId() {
 		return `${this.item.id}`;

@@ -4,3 +4,11 @@ export const refToDisplayString = (ref: string | undefined) => {
     }
     return ref.replace(/^refs\/heads\//, '');
 };
+
+export const removeTags = (str: string) => {
+    if (!str) {
+        return '';
+    }
+
+    return str.replace(/(<([^>]+)>)/gi, '');
+};

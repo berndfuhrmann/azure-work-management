@@ -31,14 +31,6 @@ export class BoardItem<
 		return 'board';
 	}
 
-	setColumns(columns: BoardColumn[]): void {
-		this._columns = columns;
-	}
-
-	getColumns(): BoardColumn[] {
-		return this._columns;
-	}
-	
 	getId() {
 		return this.item.id!;
 	}

@@ -1,7 +1,7 @@
 import { GitPullRequest } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import * as vscode from 'vscode';
 import { AbstractItem } from './abstract-item.class';
-import { refToDisplayString } from '../utils/refUtils';
+import { refToDisplayString } from '../utils/stringUtils';
 import markdownEscape from 'markdown-escape';
 export class RepositoryPullRequestItem<
 	ParentItem extends AbstractItem<any, any>,

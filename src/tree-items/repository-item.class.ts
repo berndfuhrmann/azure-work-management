@@ -1,7 +1,7 @@
 import { GitRepository } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import * as vscode from 'vscode';
 import { AbstractItem } from './abstract-item.class';
-import { refToDisplayString } from '../utils/refUtils';
+import { refToDisplayString } from '../utils/stringUtils';
 
 export class RepositoryItem<
 	ParentItem extends AbstractItem<any, any>,

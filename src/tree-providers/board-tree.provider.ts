@@ -45,8 +45,6 @@ export class BoardsTreeProvider
 
 	private async getColumns(element: BoardItem<any>) {
 		const columns = await this._boardService.getColumns(element.item.id!);
-		element.setColumns(columns);
-
 		return columns.map((column) => {
 			return new ColumnItem(
 				column,
