@@ -8,15 +8,13 @@ import { AbstractItem } from './abstract-item.class';
 export class BoardItem<
 	ParentItem extends AbstractItem<any, any>,
 > extends AbstractItem<Board, ParentItem | undefined> {
-	private _columns: BoardColumn[] = [];
-
 	constructor(
-		private _board: Board,
+		item: Board,
 		parent: ParentItem | undefined,
 		viewId: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 	) {
-		super(_board, parent, viewId, 'board');
+		super(item, parent, viewId, 'board');
 	}
 
 	getName() {

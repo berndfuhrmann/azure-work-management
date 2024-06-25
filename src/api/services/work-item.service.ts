@@ -73,6 +73,16 @@ export class WorkItemService {
 		return result;
 	}
 
+	async getComments(
+		id: number
+	) {
+		const [teamContext, workItemTrackingApi] = await Promise.all([
+			this._teamContext,
+			this._workItemTrackingApi,
+		]);
+		return await workItemTrackingApi.getComments(teamContext.project, id, undefined, undefined, false );
+	}
+
 	async updateWorkItem(
 		id: number,
 		changes: JsonPatchDocument,

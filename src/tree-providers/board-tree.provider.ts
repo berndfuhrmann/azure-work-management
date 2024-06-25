@@ -9,6 +9,7 @@ import { BoardItem } from '../tree-items/board-item.class';
 import { ColumnItem } from '../tree-items/column-item.class';
 import { WorkItemItem } from '../tree-items/work-item-item.class';
 import { AbstractTreeProvider } from './abstract-tree.provider';
+import { WorkItemPartTreeProvider } from './work-item';
 
 export class BoardsTreeProvider
 	extends AbstractTreeProvider
@@ -21,6 +22,9 @@ export class BoardsTreeProvider
 		private _workItemService: WorkItemService,
 	) {
 		super(_appSettingsService);
+		const workItemPartTreeProvider = new WorkItemPartTreeProvider(_workItemService);
+		workItemPartTreeProvider.add(this.getChildrenForContext);
+
 		this.getChildrenForContext.set('default', (_element) => this.getBoards());
 		this.getChildrenForContext.set('board', (element) =>
 			this.getColumns(element as BoardItem<any>),
@@ -75,7 +79,7 @@ export class BoardsTreeProvider
 					workItem,
 					element,
 					this.constructor.name,
-					vscode.TreeItemCollapsibleState.None,
+					vscode.TreeItemCollapsibleState.Collapsed,
 				),
 		);
 	}

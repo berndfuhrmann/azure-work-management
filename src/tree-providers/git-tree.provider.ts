@@ -7,6 +7,8 @@ import { RepositoryItem } from '../tree-items/repository-item.class';
 import { RepositoryPullRequestItem } from '../tree-items/repository-pull-request-item.class';
 import { RepositoryPullRequestsItem } from '../tree-items/repository-pull-requests-item.class';
 import { AbstractTreeProvider } from './abstract-tree.provider';
+import { WorkItemPartTreeProvider } from './work-item';
+import { WorkItemService } from '../api/services/work-item.service';
 
 export class GitTreeProvider
 	extends AbstractTreeProvider
@@ -16,8 +18,12 @@ export class GitTreeProvider
 		_context: vscode.ExtensionContext,
 		_appSettingsService: AppSettingsService,
 		private _gitService: GitService,
+		_workItemService: WorkItemService,
 	) {
 		super(_appSettingsService);
+		const workItemPartTreeProvider = new WorkItemPartTreeProvider(_workItemService);
+		workItemPartTreeProvider.add(this.getChildrenForContext);
+
 		this.getChildrenForContext.set('default', this.getGitRepositories.bind(this));
 		this.getChildrenForContext.set(
 			'repository',

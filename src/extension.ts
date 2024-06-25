@@ -45,11 +45,13 @@ export function activate(context: vscode.ExtensionContext) {
 		context,
 		appSettingsService,
 		backlogService,
+		workItemService
 	);
 	const gitTreeProvider: GitTreeProvider = new GitTreeProvider(
 		context,
 		appSettingsService,
 		gitService,
+		workItemService,
 	);
 
 	combineLatest([webApiObservable, appSettingsService.teamContextObservable]).subscribe(() => {

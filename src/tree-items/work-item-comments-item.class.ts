@@ -5,8 +5,6 @@ import { AbstractItem } from './abstract-item.class';
 export class WorkItemCommentsItem<
 	ParentItem extends AbstractItem<any, any>,
 > extends AbstractItem<WorkItem, ParentItem | undefined> {
-	contextValue = 'workItemComments';
-
 	constructor(
 		item: WorkItem,
 		parent: ParentItem | undefined,
@@ -14,8 +12,6 @@ export class WorkItemCommentsItem<
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 	) {
 		super(item, parent, viewId, 'workItemComments');
-		
-		this.resourceUri = vscode.Uri.parse(item.url!);
 	}
 
 	getName() {

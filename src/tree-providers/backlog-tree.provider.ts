@@ -5,6 +5,9 @@ import { BacklogItem } from '../tree-items/backlog-item.class';
 import { WorkItemItem } from '../tree-items/work-item-item.class';
 import { AbstractTreeProvider } from './abstract-tree.provider';
 import { WorkItemCommentsItem } from '../tree-items/work-item-comments-item.class';
+import { WorkItemService } from '../api/services/work-item.service';
+import { WorkItemCommentItem } from '../tree-items/work-item-comment-item.class';
+import { WorkItemPartTreeProvider } from './work-item';
 
 export class BacklogTreeProvider
 	extends AbstractTreeProvider
@@ -14,24 +17,18 @@ export class BacklogTreeProvider
 		_context: vscode.ExtensionContext,
 		_appSettingsService: AppSettingsService,
 		private _backlogService: BacklogService,
+		_workItemService: WorkItemService
 	) {
 		super(_appSettingsService);
+		const workItemPartTreeProvider = new WorkItemPartTreeProvider(_workItemService);
+		workItemPartTreeProvider.add(this.getChildrenForContext);
 		this.getChildrenForContext.set('default', this.getBacklogs.bind(this));
 		this.getChildrenForContext.set(
 			'backlog',
 			(element: vscode.TreeItem | undefined) =>
 				this.getWorkItems(element as BacklogItem<any>),
 		);
-		this.getChildrenForContext.set(
-			'workItem', 
-			(element: vscode.TreeItem | undefined) => 
-				this.getWorkItemChildren(element as WorkItemItem<any>),
-		);
-		this.getChildrenForContext.set(
-			'workItemComments', 
-			(element: vscode.TreeItem | undefined) => 
-				this.getWorkItemComments(element as WorkItemCommentsItem<any>),
-		);
+
 	}
 	
 
@@ -61,23 +58,5 @@ export class BacklogTreeProvider
 				vscode.TreeItemCollapsibleState.Collapsed,
 			);
 		});
-	}
-
-	private async getWorkItemChildren(element: WorkItemItem<any>) {
-		return [
-			new WorkItemCommentsItem(element.item, element, this.constructor.name, vscode.TreeItemCollapsibleState.Collapsed)
-		];
-	}
-
-	private async getWorkItemComments(element: WorkItemCommentsItem<any>) {
-		return [];
-		/*return workItems.map((workItem) => {
-			return new WorkItemItem(
-				workItem,
-				element,
-				this.constructor.name,
-				vscode.TreeItemCollapsibleState.Collapsed,
-			);
-		});*/
 	}
 }
