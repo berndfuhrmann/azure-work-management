@@ -19,8 +19,13 @@ export abstract class AbstractTreeProvider
 
 	private _onDidChangeTreeData = new vscode.EventEmitter<undefined>();
 	readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+	private _treeView: vscode.TreeView<vscode.TreeItem>;
 
 	constructor(protected _appSettingsService: AppSettingsService) {}
+
+	public setTreeView(treeView: vscode.TreeView<vscode.TreeItem>) {
+		this._treeView = treeView;
+	}
 
 	refresh(): void {
 		this._onDidChangeTreeData.fire(undefined);

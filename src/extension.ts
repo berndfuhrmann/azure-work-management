@@ -22,6 +22,17 @@ import {
 import { combineLatest } from 'rxjs';
 import { GitTreeProvider } from './tree-providers/git-tree.provider';
 import { GitService } from './api/services/git.service';
+import { AbstractTreeProvider } from './tree-providers/abstract-tree.provider';
+
+const registerTreeView = (id: string, treeProvider : AbstractTreeProvider) => {
+	vscode.window.registerFileDecorationProvider(treeProvider);
+
+	const treeView = vscode.window.createTreeView(id, {
+		treeDataProvider: treeProvider
+	});
+	treeProvider.setTreeView(treeView);
+	return treeView;
+};
 
 export function activate(context: vscode.ExtensionContext) {
 	const appSettingsService = new AppSettingsService(context);
@@ -83,23 +94,12 @@ export function activate(context: vscode.ExtensionContext) {
 		boardTreeProvider.refresh();
 		backlogTreeProvider.refresh();
 	});
-	vscode.window.registerTreeDataProvider(
-		'azure-work-management.open-boards',
-		boardTreeProvider,
-	);
-	vscode.window.registerFileDecorationProvider(boardTreeProvider);
 
-	vscode.window.registerTreeDataProvider(
-		'azure-work-management.open-backlogs',
-		backlogTreeProvider,
+	context.subscriptions.push(
+		registerTreeView('azure-work-management.open-boards', boardTreeProvider),
+		registerTreeView('azure-work-management.open-backlogs', backlogTreeProvider),
+		registerTreeView('azure-work-management.repositories', gitTreeProvider),
 	);
-	vscode.window.registerFileDecorationProvider(backlogTreeProvider);
-
-	vscode.window.registerTreeDataProvider(
-		'azure-work-management.repositories',
-		gitTreeProvider,
-	);
-	vscode.window.registerFileDecorationProvider(gitTreeProvider);
 
 	vscode.commands.registerCommand('azure-work-management.refresh-boards', () =>
 		boardTreeProvider.refresh(),
