@@ -6,6 +6,7 @@ import { BacklogItem } from '../tree-items/backlog-item.class';
 import { WorkItemItem } from '../tree-items/work-item-item.class';
 import { AbstractTreeProvider } from './abstract-tree.provider';
 import { WorkItemPartTreeProvider } from './work-item';
+import { AsyncSubject, from } from 'rxjs';
 
 export class BacklogTreeProvider
 	extends AbstractTreeProvider
@@ -22,11 +23,11 @@ export class BacklogTreeProvider
 			_workItemService,
 		);
 		workItemPartTreeProvider.add(this.getChildrenForContext);
-		this.getChildrenForContext.set('default', this.getBacklogs.bind(this));
+		this.getChildrenForContext.set('default', (element) => from(this.getBacklogs()));
 		this.getChildrenForContext.set(
 			'backlog',
 			(element: vscode.TreeItem | undefined) =>
-				this.getWorkItems(element as BacklogItem<any>),
+				from(this.getWorkItems(element as BacklogItem<any>)),
 		);
 	}
 

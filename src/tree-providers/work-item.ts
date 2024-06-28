@@ -1,3 +1,4 @@
+import { from, Observable } from 'rxjs';
 import { WorkItemService } from '../api/services/work-item.service';
 import { WorkItemCommentItem } from '../tree-items/work-item-comment-item.class';
 import { WorkItemCommentsItem } from '../tree-items/work-item-comments-item.class';
@@ -12,14 +13,14 @@ export class WorkItemPartTreeProvider {
 			string,
 			(
 				element?: vscode.TreeItem | undefined,
-			) => vscode.ProviderResult<vscode.TreeItem[]>
+			) => Observable<vscode.TreeItem[]>
 		>,
 	) {
 		map.set('workItem', (element: vscode.TreeItem | undefined) =>
-			this.getWorkItemChildren(element as WorkItemItem<any>),
+			from(this.getWorkItemChildren(element as WorkItemItem<any>)),
 		);
 		map.set('workItemComments', (element: vscode.TreeItem | undefined) =>
-			this.getWorkItemComments(element as WorkItemCommentsItem<any>),
+			from(this.getWorkItemComments(element as WorkItemCommentsItem<any>)),
 		);
 	}
 

@@ -9,6 +9,7 @@ import { ColumnItem } from '../tree-items/column-item.class';
 import { WorkItemItem } from '../tree-items/work-item-item.class';
 import { AbstractTreeProvider } from './abstract-tree.provider';
 import { WorkItemPartTreeProvider } from './work-item';
+import { from } from 'rxjs';
 
 export class BoardsTreeProvider
 	extends AbstractTreeProvider
@@ -26,14 +27,14 @@ export class BoardsTreeProvider
 		);
 		workItemPartTreeProvider.add(this.getChildrenForContext);
 
-		this.getChildrenForContext.set('default', (_element) => this.getBoards());
+		this.getChildrenForContext.set('default', (_element) => from(this.getBoards()));
 		this.getChildrenForContext.set('board', (element) =>
-			this.getColumns(element as BoardItem<any>),
+			from(this.getColumns(element as BoardItem<any>)),
 		);
 		this.getChildrenForContext.set('column', (element) =>
-			this.getWorkItems(element as ColumnItem),
+			from(this.getWorkItems(element as ColumnItem)),
 		);
-		this.getChildrenForContext.set('workItem', () => Promise.resolve([]));
+		this.getChildrenForContext.set('workItem', () => from(Promise.resolve([])));
 	}
 
 	private async getBoards(): Promise<BoardItem<any>[]> {

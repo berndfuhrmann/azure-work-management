@@ -9,6 +9,7 @@ import { RepositoryPullRequestsItem } from '../tree-items/repository-pull-reques
 import { AbstractTreeProvider } from './abstract-tree.provider';
 import { WorkItemPartTreeProvider } from './work-item';
 import { WorkItemService } from '../api/services/work-item.service';
+import { from, map, startWith } from 'rxjs';
 
 export class GitTreeProvider
 	extends AbstractTreeProvider
@@ -28,35 +29,35 @@ export class GitTreeProvider
 
 		this.getChildrenForContext.set(
 			'default',
-			this.getGitRepositories.bind(this),
+			() => from(this.getGitRepositories()),
 		);
 		this.getChildrenForContext.set(
 			'repository',
 			(element: vscode.TreeItem | undefined) =>
-				this.getRepositoryItems(element as RepositoryItem<any>),
+				from(this.getRepositoryItems(element as RepositoryItem<any>)),
 		);
 		this.getChildrenForContext.set(
 			'repository-branches',
 			(element: vscode.TreeItem | undefined) =>
-				this.getRepositoryBranches(element as RepositoryBranchesItem<any>),
+				from(this.getRepositoryBranches(element as RepositoryBranchesItem<any>)),
 		);
 		this.getChildrenForContext.set(
 			'repository-pull-requests',
 			(element: vscode.TreeItem | undefined) =>
-				this.getRepositoryPullRequests(element as RepositoryBranchesItem<any>),
+				from(this.getRepositoryPullRequests(element as RepositoryBranchesItem<any>)),
 		);
 	}
 
-	private async getGitRepositories() {
-		const gitRepositories = await this._gitService.getAll();
-		return gitRepositories.map(
-			(gitRepository) =>
+	private getGitRepositories() {
+		return from(this._gitService.getAll()).pipe(
+			map(gitRepositories => gitRepositories.map((gitRepository) =>
 				new RepositoryItem(
 					gitRepository,
 					undefined,
 					this.constructor.name,
 					vscode.TreeItemCollapsibleState.Collapsed,
-				),
+				))),
+				startWith([new vscode.TreeItem('random')])
 		);
 	}
 

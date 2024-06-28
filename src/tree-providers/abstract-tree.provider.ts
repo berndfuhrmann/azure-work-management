@@ -1,8 +1,8 @@
-import * as vscode from 'vscode';
+import { BehaviorSubject, Observable, of, pairwise, Subscription } from 'rxjs';
+import { TreeItem, default as vscode } from 'vscode';
+import { extensionName } from '../config';
 import { AppSettingsService } from '../services/app-settings.service';
 import { AbstractItem } from '../tree-items/abstract-item.class';
-import { extensionName } from '../config';
-import { ErrorItem } from '../tree-items/error-item.class';
 
 export abstract class AbstractTreeProvider
 	implements
@@ -14,12 +14,14 @@ export abstract class AbstractTreeProvider
 		string,
 		(
 			element?: vscode.TreeItem | undefined,
-		) => Promise<vscode.TreeItem[]>
+		) => Observable<vscode.TreeItem[]>
 	>();
 
-	private _onDidChangeTreeData = new vscode.EventEmitter<undefined>();
+	private _onDidChangeTreeData = new vscode.EventEmitter<undefined|TreeItem>();
 	readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 	private _treeView!: vscode.TreeView<vscode.TreeItem>;
+
+	private observables: Map<TreeItem|undefined, {subject: BehaviorSubject<TreeItem[]>, subscriptionSubject: Subscription, subscriptionTreeView: Subscription}> = new Map();
 
 	constructor(protected _appSettingsService: AppSettingsService) {}
 
@@ -27,9 +29,11 @@ export abstract class AbstractTreeProvider
 		this._treeView = treeView;
 		this._treeViewTitle = treeView.title;
 		this._treeView.message = '';
-		this._treeView.onDidCollapseElement((e) => console.log("onDidCollapseElement", e));
-		this._treeView.onDidExpandElement((e) => console.log("onDidExpandElement", e));
-		this._treeView.onDidChangeVisibility((e) => console.log("onDidChangeVisibility", e));
+		
+		this._treeView.onDidCollapseElement((e) => {
+			this._onDidChangeTreeData.fire(e.element);
+			this.unsubscribeRecursive(e.element);
+		});
 	}
 
 	refresh(): void {
@@ -40,36 +44,69 @@ export abstract class AbstractTreeProvider
 		return element;
 	}
 
-	private _loadingCounter = 0;
+	// private _loadingCounter = 0;
 	private _treeViewTitle: string | undefined;
-	private _initialLoaded: boolean = false;
+	// private _initialLoaded: boolean = false;
 
-	private updateLoadingCounter() {
-		if (!this._initialLoaded) {
-			this._treeView.message = "loading...";
-		} else {
-			this._treeView.message = undefined;
-			if (this._loadingCounter === 0) {
-				this._treeView.title = this._treeViewTitle;
-			} else {
-				this._treeView.title = `${this._treeViewTitle} (Loading...)`;
+	// private updateLoadingCounter() {
+	// 	if (!this._initialLoaded) {
+	// 		this._treeView.message = "loading...";
+	// 	} else {
+	// 		this._treeView.message = undefined;
+	// 		if (this._loadingCounter === 0) {
+	// 			this._treeView.title = this._treeViewTitle;
+	// 		} else {
+	// 			this._treeView.title = `${this._treeViewTitle} (Loading...)`;
+	// 		}
+	// 	}
+	// }
+
+	private unsubscribeSingleElement(element?: TreeItem) {
+		let entry = this.observables.get(element);
+
+		entry!.subscriptionSubject.unsubscribe();
+		entry!.subscriptionTreeView.unsubscribe();
+		this.observables.delete(element);
+	}
+
+	private unsubscribeRecursive(element?: TreeItem) {
+		let entry = this.observables.get(element);
+		if (entry !== undefined) {
+			for(const child of entry.subject.value) {
+				this.unsubscribeRecursive(child);
 			}
+			this.unsubscribeSingleElement(element);
 		}
+
 	}
 
 	async getChildren(
 		element?: vscode.TreeItem | undefined,
 	): Promise<vscode.TreeItem[]> {
 
-		this._loadingCounter++;
-		this.updateLoadingCounter();
-		const getChildren = this.getChildrenForContext.get(
-			element?.contextValue ?? AbstractTreeProvider.defaultKey,
-		);
-		const promise = getChildren?.(element) ?? Promise.resolve([]);
+		let entry = this.observables.get(element);
 
-		try {
-			return await promise;
+		if (entry === undefined) {
+			// this._loadingCounter++;
+			// this.updateLoadingCounter();
+			const getChildren = this.getChildrenForContext.get(
+				element?.contextValue ?? AbstractTreeProvider.defaultKey,
+			);
+			const newObservable = getChildren?.(element) ?? of<vscode.TreeItem[]>([]);
+			const subject = new BehaviorSubject<TreeItem[]>([]);
+			const subscriptionSubject = newObservable.subscribe(subject);
+			const subscriptionTreeView = subject.pipe(pairwise()).subscribe(([previousValue, newValue]) => {
+				this._onDidChangeTreeData.fire(element);
+				previousValue.filter(v => !newValue.includes(v)).forEach(v => this.unsubscribeRecursive(v));
+			});
+			
+			this.observables.set(element, entry = {subject, subscriptionSubject, subscriptionTreeView});
+		}
+		
+		return entry.subject.value;
+
+		/*try {
+			return await firstValueFrom(entry.subject);
 		} catch (error) {
 			return [
 				new ErrorItem(
@@ -82,7 +119,7 @@ export abstract class AbstractTreeProvider
 			this._loadingCounter--;
 			this._initialLoaded = true;
 			this.updateLoadingCounter();
-		}
+		}*/
 	}
 
 	getParent(element: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem> {
