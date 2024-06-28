@@ -14,17 +14,22 @@ export abstract class AbstractTreeProvider
 		string,
 		(
 			element?: vscode.TreeItem | undefined,
-		) => vscode.ProviderResult<vscode.TreeItem[]>
+		) => Promise<vscode.TreeItem[]>
 	>();
 
 	private _onDidChangeTreeData = new vscode.EventEmitter<undefined>();
 	readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
-	private _treeView: vscode.TreeView<vscode.TreeItem>;
+	private _treeView!: vscode.TreeView<vscode.TreeItem>;
 
 	constructor(protected _appSettingsService: AppSettingsService) {}
 
 	public setTreeView(treeView: vscode.TreeView<vscode.TreeItem>) {
 		this._treeView = treeView;
+		this._treeViewTitle = treeView.title;
+		this._treeView.message = '';
+		this._treeView.onDidCollapseElement((e) => console.log("onDidCollapseElement", e));
+		this._treeView.onDidExpandElement((e) => console.log("onDidExpandElement", e));
+		this._treeView.onDidChangeVisibility((e) => console.log("onDidChangeVisibility", e));
 	}
 
 	refresh(): void {
@@ -35,27 +40,49 @@ export abstract class AbstractTreeProvider
 		return element;
 	}
 
+	private _loadingCounter = 0;
+	private _treeViewTitle: string | undefined;
+	private _initialLoaded: boolean = false;
+
+	private updateLoadingCounter() {
+		if (!this._initialLoaded) {
+			this._treeView.message = "loading...";
+		} else {
+			this._treeView.message = undefined;
+			if (this._loadingCounter === 0) {
+				this._treeView.title = this._treeViewTitle;
+			} else {
+				this._treeView.title = `${this._treeViewTitle} (Loading...)`;
+			}
+		}
+	}
+
 	async getChildren(
 		element?: vscode.TreeItem | undefined,
 	): Promise<vscode.TreeItem[]> {
-		if (this._appSettingsService.isValidAppSettings()) {
-			const getChildren = this.getChildrenForContext.get(
-				element?.contextValue ?? AbstractTreeProvider.defaultKey,
-			);
-			try {
-				return (await getChildren?.(element)) ?? [];
-			} catch (error) {
-				return [
-					new ErrorItem(
-						error,
-						element as AbstractItem<any, any>,
-						this.constructor.name,
-					),
-				];
-			}
-		}
 
-		return [];
+		this._loadingCounter++;
+		this.updateLoadingCounter();
+		const getChildren = this.getChildrenForContext.get(
+			element?.contextValue ?? AbstractTreeProvider.defaultKey,
+		);
+		const promise = getChildren?.(element) ?? Promise.resolve([]);
+
+		try {
+			return await promise;
+		} catch (error) {
+			return [
+				new ErrorItem(
+					error,
+					element as AbstractItem<any, any>,
+					this.constructor.name,
+				),
+			];
+		} finally {
+			this._loadingCounter--;
+			this._initialLoaded = true;
+			this.updateLoadingCounter();
+		}
 	}
 
 	getParent(element: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem> {
