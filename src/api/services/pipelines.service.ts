@@ -16,7 +16,6 @@ export class PipelinesService {
 		observableToPromise((v) => (this._project = v), projectObservable);
 		observableToPromise((v) => (this._pipelinesApi = v), pipelinesApi);
 		observableToPromise((v) => (this._buildApi = v), buildApi);
-
 	}
 
 	async getPipelines() {

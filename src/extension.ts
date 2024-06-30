@@ -27,6 +27,7 @@ import { GitService } from './api/services/git.service';
 import { AbstractTreeProvider } from './tree-providers/abstract-tree.provider';
 import { PipelinesService } from './api/services/pipelines.service';
 import { PipelinesTreeProvider } from './tree-providers/pipelines-tree.provider';
+import { TeamTreeProvider } from './tree-providers/team-tree.provider';
 
 const registerTreeView = (id: string, treeProvider : AbstractTreeProvider) => {
 	vscode.window.registerFileDecorationProvider(treeProvider);
@@ -66,7 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
 		workApiObservable,
 	);
 	const teamService = new TeamService(
-		appSettingsService.teamContextObservable,
+		appSettingsService.projectObservable,
 		coreApiObservable,
 	);
 	const teamFieldValuesService = new TeamFieldValuesService(appSettingsService);
@@ -102,6 +103,14 @@ export function activate(context: vscode.ExtensionContext) {
 		appSettingsService,
 		pipelinesService
 	);
+	const teamTreeProvider = new TeamTreeProvider(
+		context,
+		appSettingsService,
+		teamService,
+		boardService,
+		workItemService,
+	);
+
 
 	combineLatest([
 		webApiObservable,
@@ -109,6 +118,8 @@ export function activate(context: vscode.ExtensionContext) {
 	]).subscribe(() => {
 		boardTreeProvider.refresh();
 		backlogTreeProvider.refresh();
+
+		teamTreeProvider.refresh();
 	});
 
 	context.subscriptions.push(
@@ -116,6 +127,7 @@ export function activate(context: vscode.ExtensionContext) {
 		registerTreeView('azure-work-management.open-backlogs', backlogTreeProvider),
 		registerTreeView('azure-work-management.repositories', gitTreeProvider),
 		registerTreeView('azure-work-management.pipelines', pipelinesTreeProvider),
+		registerTreeView('azure-work-management.teams', teamTreeProvider),
 	);
 
 	vscode.commands.registerCommand('azure-work-management.refresh-boards', () =>

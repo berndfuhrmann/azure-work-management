@@ -3,24 +3,24 @@ import { Observable } from 'rxjs';
 import { observableToPromise } from '../../utils/promise';
 
 export class TeamService {
-	private _teamContext!: Promise<{ project: string; team: string }>;
+	private _project!: Promise<string>;
 	private _coreApi!: Promise<CoreApi>;
 	constructor(
-		teamContext: Observable<Promise<{ project: string; team: string }>>,
+		project: Observable<Promise<string>>,
 		coreApi: Observable<Promise<CoreApi>>,
 	) {
-		observableToPromise((v) => (this._teamContext = v), teamContext);
+		observableToPromise((v) => (this._project = v), project);
 		observableToPromise((v) => (this._coreApi = v), coreApi);
 	}
 	async getTeams() {
 		const coreApi = await this._coreApi;
-		return await coreApi.getTeams((await this._teamContext).project);
+		return await coreApi.getTeams(await this._project);
 	}
 
-	async getTeamMembers(projectName: string, teamName: string) {
-		const coreApi = await this._coreApi;
+	async getTeamMembers(teamName: string) {
+		const [ coreApi, project ] = await Promise.all([this._coreApi, this._project]);
 		return await coreApi.getTeamMembersWithExtendedProperties(
-			projectName,
+			project,
 			teamName,
 		);
 	}

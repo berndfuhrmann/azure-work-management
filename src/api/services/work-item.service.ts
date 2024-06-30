@@ -91,6 +91,26 @@ export class WorkItemService {
 		);
 	}
 
+	async getWorkItemsAssignedToTeamMember(teamMember: string) {
+		const data: { query: string } = {
+			query: `SELECT [System.State], [System.Title] FROM WorkItems WHERE [System.AssignedTo] = '${teamMember}' ORDER BY [State] Asc`,
+		};
+
+		const workItemTrackingApi = await this._workItemTrackingApi;
+		const workItems = await workItemTrackingApi.queryByWiql(
+			{
+				query: data.query,
+			},
+			await this._teamContext,
+		);
+
+		const ids =
+			workItems.workItems
+				?.map((workItem) => workItem.id)
+				.filter((id): id is number => typeof id === 'number') ?? [];
+		return this.getWorkItems(ids);
+	}
+
 	async updateWorkItem(
 		id: number,
 		changes: JsonPatchDocument,

@@ -102,6 +102,12 @@
 					"name": "Pipelines",
 					"contextualTitle": "Pipelines",
 					"visibility": "collapsed"
+				},
+				{
+					"id": "azure-work-management.teams",
+					"name": "Teams",
+					"contextualTitle": "Teams",
+					"visibility": "collapsed"
 				}
 			]
 		},

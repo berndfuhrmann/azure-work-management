@@ -49,12 +49,11 @@ export const assignToAction = async (
 		teamService: TeamService;
 	},
 ): Promise<void | string> => {
-	const projectName: string = appSettingsService.getProject();
 	const teamName: string = appSettingsService.getTeam();
 
 	const result = await vscode.window.showQuickPick(
 		teamService
-			.getTeamMembers(projectName, teamName)
+			.getTeamMembers(teamName)
 			.then((users) => users.map((user) => user.identity!.displayName!)),
 		{
 			placeHolder: 'Choose A Column',
