@@ -13,8 +13,10 @@ import { BacklogTreeProvider } from './tree-providers/backlog-tree.provider';
 import { BoardsTreeProvider } from './tree-providers/board-tree.provider';
 import { ColumnItem } from './tree-items/column-item.class';
 import {
+	buildApi,
 	coreApi,
 	gitApi,
+	pipelinesApi,
 	webApi,
 	workApi,
 	workItemTrackingApi,
@@ -23,6 +25,8 @@ import { combineLatest } from 'rxjs';
 import { GitTreeProvider } from './tree-providers/git-tree.provider';
 import { GitService } from './api/services/git.service';
 import { AbstractTreeProvider } from './tree-providers/abstract-tree.provider';
+import { PipelinesService } from './api/services/pipelines.service';
+import { PipelinesTreeProvider } from './tree-providers/pipelines-tree.provider';
 
 const registerTreeView = (id: string, treeProvider : AbstractTreeProvider) => {
 	vscode.window.registerFileDecorationProvider(treeProvider);
@@ -41,6 +45,8 @@ export function activate(context: vscode.ExtensionContext) {
 	const workItemTrackingApiObservable = workItemTrackingApi(webApiObservable);
 	const workApiObservable = workApi(webApiObservable);
 	const gitApiObservable = gitApi(webApiObservable);
+	const pipelinesApiObservable = pipelinesApi(webApiObservable);
+	const buildApiObservable = buildApi(webApiObservable);
 
 	const workItemService = new WorkItemService(
 		appSettingsService.teamContextObservable,
@@ -68,23 +74,33 @@ export function activate(context: vscode.ExtensionContext) {
 		appSettingsService.teamContextObservable,
 		gitApiObservable,
 	);
-	const boardTreeProvider: BoardsTreeProvider = new BoardsTreeProvider(
+	const pipelinesService = new PipelinesService(
+		appSettingsService.projectObservable,
+		pipelinesApiObservable,
+		buildApiObservable
+	);
+	const boardTreeProvider = new BoardsTreeProvider(
 		context,
 		appSettingsService,
 		boardService,
 		workItemService,
 	);
-	const backlogTreeProvider: BacklogTreeProvider = new BacklogTreeProvider(
+	const backlogTreeProvider = new BacklogTreeProvider(
 		context,
 		appSettingsService,
 		backlogService,
 		workItemService,
 	);
-	const gitTreeProvider: GitTreeProvider = new GitTreeProvider(
+	const gitTreeProvider = new GitTreeProvider(
 		context,
 		appSettingsService,
 		gitService,
 		workItemService,
+	);
+	const pipelinesTreeProvider = new PipelinesTreeProvider(
+		context,
+		appSettingsService,
+		pipelinesService
 	);
 
 	combineLatest([
@@ -99,6 +115,7 @@ export function activate(context: vscode.ExtensionContext) {
 		registerTreeView('azure-work-management.open-boards', boardTreeProvider),
 		registerTreeView('azure-work-management.open-backlogs', backlogTreeProvider),
 		registerTreeView('azure-work-management.repositories', gitTreeProvider),
+		registerTreeView('azure-work-management.pipelines', pipelinesTreeProvider),
 	);
 
 	vscode.commands.registerCommand('azure-work-management.refresh-boards', () =>

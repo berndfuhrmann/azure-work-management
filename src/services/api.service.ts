@@ -48,3 +48,9 @@ export const workApi = (webApiObservable: Observable<Promise<WebApi>>) =>
 
 export const gitApi = (webApiObservable: Observable<Promise<WebApi>>) =>
 	apiObservable(webApiObservable, async (webApi) => (await webApi).getGitApi());
+
+export const pipelinesApi = (webApiObservable: Observable<Promise<WebApi>>) =>
+	apiObservable(webApiObservable, async (webApi) => (await webApi).getPipelinesApi());
+
+export const buildApi = (webApiObservable: Observable<Promise<WebApi>>) =>
+	apiObservable(webApiObservable, async (webApi) => (await webApi).getBuildApi());

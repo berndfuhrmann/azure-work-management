@@ -12,6 +12,10 @@ export class AppSettingsService {
 		this.getTeamContext(),
 	);
 
+	private readonly _projectObservable = new BehaviorSubject(
+		this.getProject(),
+	);
+
 	/**
 	 * A stream of server settings. Completes when extension is shutting down.
 	 */
@@ -65,12 +69,30 @@ export class AppSettingsService {
 		),
 	);
 
+		/**
+	 * A stream of team settings. Completes when extension is shutting down.
+	 */
+		public projectObservable = this._projectObservable.pipe(
+			distinctUntilChanged(),
+			map(
+				(settings) =>
+					new Promise<string>((resolve, reject) => {
+						if (settings) {
+							resolve(settings);
+						} else {
+							reject();
+						}
+					}),
+			),
+		);
+
 	constructor(context: vscode.ExtensionContext) {
 		context.subscriptions.push(
 			vscode.workspace.onDidChangeConfiguration((e) => {
 				if (e.affectsConfiguration(AppSettingsService.configurationSection)) {
 					this._settingsObservable.next(this.getSettings());
 					this._teamContextObservable.next(this.getTeamContext());
+					this._projectObservable.next(this.getProject());
 				}
 			}),
 			vscode.Disposable.from({

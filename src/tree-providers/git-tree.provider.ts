@@ -1,5 +1,7 @@
+import { from, map } from 'rxjs';
 import * as vscode from 'vscode';
 import { GitService } from '../api/services/git.service';
+import { WorkItemService } from '../api/services/work-item.service';
 import { AppSettingsService } from '../services/app-settings.service';
 import { RepositoryBranchItem } from '../tree-items/repository-branch-item.class';
 import { RepositoryBranchesItem } from '../tree-items/repository-branches-item.class';
@@ -8,8 +10,6 @@ import { RepositoryPullRequestItem } from '../tree-items/repository-pull-request
 import { RepositoryPullRequestsItem } from '../tree-items/repository-pull-requests-item.class';
 import { AbstractTreeProvider } from './abstract-tree.provider';
 import { WorkItemPartTreeProvider } from './work-item';
-import { WorkItemService } from '../api/services/work-item.service';
-import { from, map, startWith } from 'rxjs';
 
 export class GitTreeProvider
 	extends AbstractTreeProvider
@@ -57,7 +57,6 @@ export class GitTreeProvider
 					this.constructor.name,
 					vscode.TreeItemCollapsibleState.Collapsed,
 				))),
-				startWith([new vscode.TreeItem('random')])
 		);
 	}
 
